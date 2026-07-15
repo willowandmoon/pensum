@@ -73,6 +73,12 @@ export default function CourseCard({
         />
       )}
 
+      {/* destello de esquina para "este semestre" (fuera del botón para no
+          quedar recortado por el overflow-hidden de la franja de área) */}
+      {isCurrent && (
+        <Sparkle className="pointer-events-none absolute -right-2 -top-2 z-20 h-4 w-4 text-cobalt drop-shadow" />
+      )}
+
       <button
         ref={cardRef}
         type="button"
@@ -85,7 +91,7 @@ export default function CourseCard({
             : "Clic para cambiar el estado"
         }
         className={[
-          "relative z-10 flex h-full w-full flex-col justify-between gap-1 rounded-2xl border-[2.5px] px-3 py-2.5 text-left",
+          "relative z-10 flex h-full w-full flex-col justify-between gap-1 overflow-hidden rounded-2xl border-[2.5px] py-2.5 pl-4 pr-3 text-left",
           "transition-transform duration-200 outline-none",
           "hover:-translate-y-1 hover:rotate-0 focus-visible:-translate-y-1 focus-visible:rotate-0",
           highlighted || isCurrent ? "shadow-hard-lg -translate-y-1 rotate-0" : "shadow-hard",
@@ -98,23 +104,23 @@ export default function CourseCard({
           borderColor: denied ? "var(--color-tomato)" : state.border,
         }}
       >
+        {/* franja de color por área, bien visible en el borde izquierdo */}
+        <span
+          aria-hidden="true"
+          title={area.label}
+          className="absolute inset-y-0 left-0 w-2.5"
+          style={{ background: area.bg, borderRight: "2px solid var(--color-ink)" }}
+        />
+
         <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 items-start gap-1.5">
-            <span
-              aria-hidden="true"
-              title={area.label}
-              className="mt-1 h-2 w-2 shrink-0 rounded-full border"
-              style={{ background: area.bg, borderColor: "var(--color-ink)" }}
-            />
-            <span
-              className={[
-                "font-display text-[13px] font-semibold leading-snug",
-                isCompleted ? "line-through opacity-70" : "",
-              ].join(" ")}
-            >
-              {course.name}
-            </span>
-          </div>
+          <span
+            className={[
+              "font-display text-[13px] font-semibold leading-snug",
+              isCompleted ? "line-through opacity-70" : "",
+            ].join(" ")}
+          >
+            {course.name}
+          </span>
           <span
             aria-hidden="true"
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-cream font-display text-[11px] font-bold text-ink"
@@ -148,10 +154,6 @@ export default function CourseCard({
             </span>
           )}
         </div>
-
-        {isCurrent && (
-          <Sparkle className="pointer-events-none absolute -right-2 -top-2 z-20 h-4 w-4 text-cobalt drop-shadow" />
-        )}
       </button>
     </div>
   );

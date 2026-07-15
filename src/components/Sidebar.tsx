@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/AppContext";
+import { CAREERS } from "@/lib/types";
 import {
   IconBoard,
   IconBook,
@@ -23,19 +24,16 @@ const NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useApp();
+  const careerLabel = CAREERS.find((c) => c.value === user.career)?.label ?? user.career;
 
   return (
     <>
       {/* barra lateral en escritorio */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r-[3px] border-ink bg-cream lg:flex">
-        <div className="flex items-center gap-2.5 border-b-2 border-dashed border-ink/30 px-5 py-5">
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl border-2 border-ink font-display text-base font-bold shadow-hard-sm"
-            style={{ background: "var(--color-tangerine)", color: "var(--color-ink)" }}
-          >
-            π
-          </div>
-          <span className="font-display text-base font-bold text-ink">Mi Pensum</span>
+        <div className="border-b-2 border-dashed border-ink/30 px-5 py-5">
+          <span className="font-display text-base font-bold leading-tight text-ink">
+            {careerLabel}
+          </span>
         </div>
 
         <nav className="flex flex-1 flex-col gap-1.5 px-3 py-4">
@@ -77,15 +75,7 @@ export default function Sidebar() {
       {/* barra superior + tabs en móvil/tablet */}
       <header className="sticky top-0 z-30 border-b-[3px] border-ink bg-cream/95 shadow-hard-sm backdrop-blur lg:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div
-              className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-ink font-display text-sm font-bold"
-              style={{ background: "var(--color-tangerine)", color: "var(--color-ink)" }}
-            >
-              π
-            </div>
-            <span className="font-display text-sm font-bold text-ink">Mi Pensum</span>
-          </div>
+          <span className="font-display text-sm font-bold text-ink">{careerLabel}</span>
           <button
             onClick={logout}
             className="flex items-center gap-1.5 rounded-full border-2 border-ink bg-[color:var(--color-paper-deep)] px-3 py-1.5 text-xs font-bold text-ink shadow-hard-sm"

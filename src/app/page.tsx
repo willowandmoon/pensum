@@ -12,9 +12,7 @@ export default function Page() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-display text-xl font-bold text-ink">Pensum</h1>
-            <p className="text-xs font-semibold text-ink/60">
-              Ingeniería Informática · Plan 8210
-            </p>
+            <p className="text-xs font-semibold text-ink/60">Plan 8210</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {STATUS_ORDER.map((key, i) => {
