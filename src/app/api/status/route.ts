@@ -5,15 +5,15 @@ const VALID_STATUSES = new Set(["pending", "current", "completed"]);
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
-  const username = body?.username?.trim().toLowerCase();
+  const email = body?.email?.trim().toLowerCase();
   const courseCode = body?.courseCode;
   const status = body?.status;
 
-  if (!username || !courseCode || !VALID_STATUSES.has(status)) {
+  if (!email || !courseCode || !VALID_STATUSES.has(status)) {
     return NextResponse.json({ error: "Datos inválidos." }, { status: 400 });
   }
 
-  const userRows = await sql`SELECT id FROM users WHERE username = ${username}`;
+  const userRows = await sql`SELECT id FROM users WHERE email = ${email}`;
   if (userRows.length === 0) {
     return NextResponse.json({ error: "Usuario no encontrado." }, { status: 404 });
   }

@@ -2,6 +2,23 @@ export type Area = "CB" | "CBI" | "IA" | "FC" | "ESP";
 
 export type Status = "pending" | "current" | "completed";
 
+export interface Career {
+  value: string;
+  label: string;
+}
+
+// Por ahora solo hay pensum cargado para Ingeniería Informática.
+// Cuando se agregue otra carrera, solo hay que sumarla aquí.
+export const CAREERS: Career[] = [
+  { value: "ing-informatica", label: "Ingeniería Informática" },
+];
+
+export interface User {
+  email: string;
+  name: string;
+  career: string;
+}
+
 export interface Course {
   code: string;
   name: string;

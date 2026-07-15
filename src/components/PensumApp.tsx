@@ -12,13 +12,14 @@ import {
   MAX_ROW,
   Status,
   TOTAL_CREDITS,
+  User,
 } from "@/lib/types";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
-const STORAGE_KEY = "pensum-username";
+const STORAGE_KEY = "pensum-user";
 
 export default function PensumApp() {
-  const [username, setUsername] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [statuses, setStatuses] = useState<Record<string, Status>>({});
   const [loading, setLoading] = useState(true);
@@ -37,12 +38,23 @@ export default function PensumApp() {
 
   const fitRef = useRef<HTMLDivElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
+  // Encadena los guardados por materia para que no se crucen en el servidor
+  // si el usuario cambia el estado de una misma materia varias veces seguido.
+  const pendingSaves = useRef<Record<string, Promise<unknown>>>({});
   const cardRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) setUsername(saved);
-    else setLoading(false);
+    if (saved) {
+      try {
+        setUser(JSON.parse(saved));
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -87,31 +99,31 @@ export default function PensumApp() {
   }, [isWide, courses, loading]);
 
   useEffect(() => {
-    if (!username) return;
+    if (!user) return;
     setLoading(true);
-    fetch(`/api/pensum?username=${encodeURIComponent(username)}`)
+    fetch(`/api/pensum?email=${encodeURIComponent(user.email)}`)
       .then((res) => res.json())
       .then((data) => {
         setCourses(data.courses);
         setStatuses(data.statuses);
       })
       .finally(() => setLoading(false));
-  }, [username]);
+  }, [user]);
 
-  function handleLogin(name: string) {
-    localStorage.setItem(STORAGE_KEY, name);
-    setUsername(name);
+  function handleAuthenticated(nextUser: User) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
+    setUser(nextUser);
   }
 
   function handleLogout() {
     localStorage.removeItem(STORAGE_KEY);
-    setUsername(null);
+    setUser(null);
     setCourses([]);
     setStatuses({});
   }
 
   function cycleStatus(code: string, next: Status) {
-    if (!username) return;
+    if (!user) return;
     // Bloqueada: no se puede marcar como "este semestre" ni "vista" hasta
     // ver todos los prerrequisitos. Sí se permite volver a "pendiente".
     if (next !== "pending" && lockedCodes.has(code)) {
@@ -125,11 +137,15 @@ export default function PensumApp() {
       else copy[code] = next;
       return copy;
     });
-    fetch("/api/status", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, courseCode: code, status: next }),
-    }).catch(() => {});
+    const email = user.email;
+    const previous = pendingSaves.current[code] ?? Promise.resolve();
+    pendingSaves.current[code] = previous.then(() =>
+      fetch("/api/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, courseCode: code, status: next }),
+      }).catch(() => {})
+    );
   }
 
   const creditsByLevel = useMemo(() => {
@@ -203,8 +219,8 @@ export default function PensumApp() {
 
   const pct = Math.min(100, Math.round((completedCredits / TOTAL_CREDITS) * 100));
 
-  if (!username) {
-    return <LoginScreen onLogin={handleLogin} />;
+  if (!user) {
+    return <LoginScreen onAuthenticated={handleAuthenticated} />;
   }
 
   return (
@@ -222,7 +238,7 @@ export default function PensumApp() {
             </div>
             <div className="flex items-center gap-3">
               <span className="rounded-full border border-[color:var(--hairline)] bg-[color:var(--panel)] px-3 py-1.5 text-sm text-[color:var(--ink-soft)]">
-                Hola, <span className="font-semibold text-[color:var(--ink)]">{username}</span>
+                Hola, <span className="font-semibold text-[color:var(--ink)]">{user.name}</span>
               </span>
               <button
                 onClick={handleLogout}

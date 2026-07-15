@@ -90,15 +90,33 @@ const courses = [
   ["ING01230", "Electiva 3", 10, 2, "FC", []],
 ];
 
+const DEFAULT_CAREER = "ing-informatica";
+
 async function main() {
   console.log("Creando tablas...");
   await sql`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
-      username TEXT UNIQUE NOT NULL,
+      username TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  // Migración: de "username" simple a registro real con correo/contraseña/carrera.
+  await sql`ALTER TABLE users ALTER COLUMN username DROP NOT NULL`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS career TEXT`;
+  await sql`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'users_email_key'
+      ) THEN
+        ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
+      END IF;
+    END $$;
+  `;
+
   await sql`
     CREATE TABLE IF NOT EXISTS courses (
       code TEXT PRIMARY KEY,
@@ -107,10 +125,12 @@ async function main() {
       credits INT NOT NULL,
       area TEXT NOT NULL,
       prereqs TEXT[] NOT NULL DEFAULT '{}',
-      coreqs TEXT[] NOT NULL DEFAULT '{}'
+      coreqs TEXT[] NOT NULL DEFAULT '{}',
+      career TEXT NOT NULL DEFAULT 'ing-informatica'
     )
   `;
   await sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS coreqs TEXT[] NOT NULL DEFAULT '{}'`;
+  await sql`ALTER TABLE courses ADD COLUMN IF NOT EXISTS career TEXT NOT NULL DEFAULT 'ing-informatica'`;
   await sql`
     CREATE TABLE IF NOT EXISTS user_course_status (
       user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -124,15 +144,16 @@ async function main() {
   console.log(`Insertando ${courses.length} materias...`);
   for (const [code, name, level, credits, area, prereqs, coreqs = []] of courses) {
     await sql`
-      INSERT INTO courses (code, name, level, credits, area, prereqs, coreqs)
-      VALUES (${code}, ${name}, ${level}, ${credits}, ${area}, ${prereqs}, ${coreqs})
+      INSERT INTO courses (code, name, level, credits, area, prereqs, coreqs, career)
+      VALUES (${code}, ${name}, ${level}, ${credits}, ${area}, ${prereqs}, ${coreqs}, ${DEFAULT_CAREER})
       ON CONFLICT (code) DO UPDATE SET
         name = EXCLUDED.name,
         level = EXCLUDED.level,
         credits = EXCLUDED.credits,
         area = EXCLUDED.area,
         prereqs = EXCLUDED.prereqs,
-        coreqs = EXCLUDED.coreqs
+        coreqs = EXCLUDED.coreqs,
+        career = EXCLUDED.career
     `;
   }
 

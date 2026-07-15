@@ -1,29 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-
-function normalize(username: string) {
-  return username.trim().toLowerCase().replace(/\s+/g, " ");
-}
+import { verifyPassword } from "@/lib/password";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
-  const raw = body?.username;
+  const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+  const password = typeof body?.password === "string" ? body.password : "";
 
-  if (typeof raw !== "string" || normalize(raw).length < 2) {
+  if (!email || !password) {
     return NextResponse.json(
-      { error: "El nombre de usuario debe tener al menos 2 caracteres." },
+      { error: "Escribe tu correo y tu contraseña." },
       { status: 400 }
     );
   }
 
-  const username = normalize(raw);
-
   const rows = await sql`
-    INSERT INTO users (username)
-    VALUES (${username})
-    ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username
-    RETURNING id, username
+    SELECT email, name, career, password_hash
+    FROM users
+    WHERE email = ${email}
   `;
 
-  return NextResponse.json({ user: rows[0] });
+  const user = rows[0];
+  if (!user || !user.password_hash || !verifyPassword(password, user.password_hash)) {
+    return NextResponse.json(
+      { error: "Correo o contraseña incorrectos." },
+      { status: 401 }
+    );
+  }
+
+  return NextResponse.json({
+    user: { email: user.email, name: user.name, career: user.career },
+  });
 }
