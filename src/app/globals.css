@@ -1,34 +1,81 @@
 @import "tailwindcss";
 
-:root {
-  /* Tokens de diseño (derivados de la malla oficial: crema, cajas por área) */
-  --page: #eef0f4;
-  --page-2: #e7e9ef;
-  --panel: #ffffff;
-  --ink: #1f2937;
-  --ink-soft: #64748b;
-  --hairline: #e2e8f0;
-}
-
 @theme inline {
-  --color-background: var(--page);
-  --color-foreground: var(--ink);
+  /* Paleta "scrapbook" */
+  --color-paper: #fdf3dc;
+  --color-paper-deep: #f6e7c4;
+  --color-ink: #1a1a1a;
+  --color-cream: #fffaf0;
+  --color-tomato: #f2543d;
+  --color-cobalt: #2b5fd9;
+  --color-grass: #3aa84a;
+  --color-tangerine: #f59a23;
+  --color-bubblegum: #f06aa0;
+
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
 }
 
+:root {
+  color-scheme: light;
+}
+
 body {
-  /* Fondo sutil con dos tonos, sin gradiente genérico de hero */
-  background:
-    radial-gradient(1200px 600px at 100% -10%, var(--page-2), transparent 60%),
-    var(--page);
-  color: var(--ink);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
   font-family: var(--font-sans), system-ui, sans-serif;
+  /* textura de papel sutil */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
 .font-display {
   font-family: var(--font-display), var(--font-sans), sans-serif;
 }
+
+::selection {
+  background: var(--color-tangerine);
+  color: var(--color-ink);
+}
+
+/* Sombra dura y desplazada, tipo pegatina (nunca difusa) */
+.shadow-hard-sm {
+  box-shadow: 2px 2px 0 0 var(--color-ink);
+}
+.shadow-hard {
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+}
+.shadow-hard-lg {
+  box-shadow: 5px 6px 0 0 var(--color-ink);
+}
+
+/* Relleno a rayas diagonales para la barra de progreso */
+.stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-ink) 0,
+    var(--color-ink) 3px,
+    transparent 3px,
+    transparent 11px
+  );
+}
+.stripes-soft {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(26, 26, 26, 0.18) 0,
+    rgba(26, 26, 26, 0.18) 2px,
+    transparent 2px,
+    transparent 9px
+  );
+}
+
+/* Inclinaciones sutiles tipo "hecho a mano" */
+.tilt-1 { transform: rotate(-1.4deg); }
+.tilt-2 { transform: rotate(1.1deg); }
+.tilt-3 { transform: rotate(-0.7deg); }
+.tilt-4 { transform: rotate(1.8deg); }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -36,4 +83,10 @@ body {
   40% { transform: translateX(4px); }
   60% { transform: translateX(-3px); }
   80% { transform: translateX(3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt-1, .tilt-2, .tilt-3, .tilt-4 {
+    transform: none !important;
+  }
 }

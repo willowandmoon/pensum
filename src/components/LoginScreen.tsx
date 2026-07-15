@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CAREERS, User } from "@/lib/types";
+import { Sparkle, Squiggle, Star } from "./doodles";
 
 type Mode = "login" | "register";
 
@@ -64,22 +65,31 @@ export default function LoginScreen({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f7f5ef] px-4">
-      <div className="w-full max-w-sm rounded-2xl border-2 border-slate-800 bg-white p-8 shadow-[6px_6px_0_0_rgba(30,41,59,1)]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+      <Star className="pointer-events-none absolute left-8 top-16 h-9 w-9 text-tangerine/70" />
+      <Sparkle className="pointer-events-none absolute right-10 top-24 h-8 w-8 text-cobalt/70" />
+      <Sparkle className="pointer-events-none absolute bottom-20 left-14 h-7 w-7 text-bubblegum/70" />
+      <Star className="pointer-events-none absolute bottom-16 right-12 h-8 w-8 text-grass/60" />
+
+      <div className="w-full max-w-sm rounded-3xl border-[3px] border-ink bg-cream p-8 shadow-hard-lg">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border-2 border-slate-800 bg-[#FFD966] text-2xl font-bold text-slate-900">
+          <div
+            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border-[2.5px] border-ink font-display text-3xl font-bold shadow-hard-sm"
+            style={{ background: "var(--color-tangerine)", color: "var(--color-ink)" }}
+          >
             π
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Mi Pensum</h1>
-          <p className="mt-1 text-sm text-slate-500">Politécnico JIC</p>
+          <h1 className="font-display text-2xl font-bold text-ink">Mi Pensum</h1>
+          <Squiggle className="mx-auto mt-1 h-2.5 w-32 text-bubblegum" />
+          <p className="mt-2 text-sm font-semibold text-ink/70">Politécnico JIC</p>
         </div>
 
-        <div className="mb-5 flex rounded-lg border-2 border-slate-800 p-1">
+        <div className="mb-5 flex rounded-full border-[2.5px] border-ink bg-[color:var(--color-paper-deep)] p-1">
           <button
             type="button"
             onClick={() => switchMode("login")}
-            className={`flex-1 rounded-md py-1.5 text-sm font-semibold transition ${
-              mode === "login" ? "bg-slate-900 text-white" : "text-slate-500"
+            className={`flex-1 rounded-full py-1.5 font-display text-sm font-semibold transition ${
+              mode === "login" ? "border-2 border-ink bg-cobalt text-cream shadow-hard-sm" : "text-ink/60"
             }`}
           >
             Iniciar sesión
@@ -87,8 +97,8 @@ export default function LoginScreen({
           <button
             type="button"
             onClick={() => switchMode("register")}
-            className={`flex-1 rounded-md py-1.5 text-sm font-semibold transition ${
-              mode === "register" ? "bg-slate-900 text-white" : "text-slate-500"
+            className={`flex-1 rounded-full py-1.5 font-display text-sm font-semibold transition ${
+              mode === "register" ? "border-2 border-ink bg-cobalt text-cream shadow-hard-sm" : "text-ink/60"
             }`}
           >
             Crear cuenta
@@ -102,7 +112,7 @@ export default function LoginScreen({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nombre completo"
-              className="w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 outline-none focus:border-slate-800"
+              className="w-full rounded-xl border-[2.5px] border-ink bg-cream px-4 py-3 font-semibold text-ink placeholder-ink/40 outline-none focus:bg-white"
             />
           )}
           <input
@@ -111,24 +121,24 @@ export default function LoginScreen({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Correo electrónico"
-            className="w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 outline-none focus:border-slate-800"
+            className="w-full rounded-xl border-[2.5px] border-ink bg-cream px-4 py-3 font-semibold text-ink placeholder-ink/40 outline-none focus:bg-white"
           />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Contraseña"
-            className="w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 outline-none focus:border-slate-800"
+            className="w-full rounded-xl border-[2.5px] border-ink bg-cream px-4 py-3 font-semibold text-ink placeholder-ink/40 outline-none focus:bg-white"
           />
           {mode === "register" && (
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-500">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-ink/60">
                 Carrera
               </label>
               <select
                 value={career}
                 onChange={(e) => setCareer(e.target.value)}
-                className="w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-slate-800"
+                className="w-full rounded-xl border-[2.5px] border-ink bg-cream px-4 py-3 font-semibold text-ink outline-none focus:bg-white"
               >
                 {CAREERS.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -136,16 +146,20 @@ export default function LoginScreen({
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs font-semibold text-ink/50">
                 Por ahora solo hay pensum cargado para esta carrera.
               </p>
             </div>
           )}
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p className="rounded-xl border-2 border-tomato bg-tomato/10 px-3 py-2 text-sm font-semibold text-tomato">
+              {error}
+            </p>
+          )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg border-2 border-slate-800 bg-slate-900 py-3 font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+            className="w-full rounded-full border-[2.5px] border-ink bg-grass py-3 font-display font-bold text-cream shadow-hard transition hover:-translate-y-0.5 hover:shadow-hard-lg disabled:opacity-50"
           >
             {loading
               ? "Un momento..."

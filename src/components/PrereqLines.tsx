@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, RefObject, MutableRefObject } from "react";
-import { Course, Status } from "@/lib/types";
+import { AREA_INFO, Course, Status } from "@/lib/types";
 
 // Deben coincidir con columnGap/rowGap del grid en PensumApp (px del board sin escalar).
 const COLUMN_GAP = 64;
@@ -20,6 +20,7 @@ interface LinePath {
   kind: "prereq" | "coreq";
   satisfied: boolean;
   related: boolean;
+  color: string;
 }
 
 export default function PrereqLines({
@@ -41,7 +42,9 @@ export default function PrereqLines({
   const [paths, setPaths] = useState<LinePath[]>([]);
 
   const edges: Edge[] = [];
+  const courseByCode = new Map<string, Course>();
   for (const c of courses) {
+    courseByCode.set(c.code, c);
     for (const p of c.prereqs) {
       edges.push({ id: `${p}->${c.code}`, from: p, to: c.code, kind: "prereq" });
     }
@@ -124,12 +127,15 @@ export default function PrereqLines({
         }
         const related =
           hoveredCode !== null && (edge.from === hoveredCode || edge.to === hoveredCode);
+        const targetCourse = courseByCode.get(edge.to);
+        const color = targetCourse ? AREA_INFO[targetCourse.area].bg : "var(--color-ink)";
         next.push({
           id: edge.id,
           d,
           kind: edge.kind,
           satisfied: statuses[edge.from] === "completed",
           related,
+          color,
         });
       }
       setPaths(next);
@@ -167,35 +173,24 @@ export default function PrereqLines({
           markerHeight="4"
           orient="auto-start-reverse"
         >
-          <path d="M1,1.5 L8,5 L1,8.5 z" fill="#cbd5e1" />
-        </marker>
-        <marker
-          id="arrow-dark"
-          viewBox="0 0 10 10"
-          refX="7.5"
-          refY="5"
-          markerWidth="4.5"
-          markerHeight="4.5"
-          orient="auto-start-reverse"
-        >
-          <path d="M1,1.5 L8,5 L1,8.5 z" fill="#1f2937" />
+          <path d="M1,1.5 L8,5 L1,8.5 z" fill="var(--color-ink)" />
         </marker>
       </defs>
-      {/* Todas las líneas se ven tenues; al pasar sobre una materia, las suyas
-          se vuelven oscuras y el resto se atenúa aún más. */}
+      {/* Trazo tipo boceto: tenue por defecto (tinta), y al pasar el cursor
+          sobre una materia sus conexiones se pintan del color de su área. */}
       {paths.map((p) => {
         const isCoreq = p.kind === "coreq";
-        const dash = isCoreq ? "5 4" : undefined;
+        const dash = isCoreq ? "3 9" : undefined;
         if (p.related) {
           return (
             <path
               key={p.id}
               d={p.d}
               fill="none"
-              stroke="#1f2937"
-              strokeWidth={2}
+              stroke={p.color}
+              strokeWidth={4}
+              strokeLinecap="round"
               strokeDasharray={dash}
-              markerEnd={isCoreq ? undefined : "url(#arrow-dark)"}
             />
           );
         }
@@ -204,10 +199,11 @@ export default function PrereqLines({
             key={p.id}
             d={p.d}
             fill="none"
-            stroke={p.satisfied ? "#86efac" : "#cbd5e1"}
-            strokeWidth={1.5}
+            stroke="var(--color-ink)"
+            strokeWidth={2}
+            strokeLinecap="round"
             strokeDasharray={dash}
-            opacity={anyHovered ? 0.08 : 0.3}
+            strokeOpacity={anyHovered ? 0.1 : 0.26}
             markerEnd={isCoreq ? undefined : "url(#arrow-faint)"}
           />
         );

@@ -31,39 +31,42 @@ export interface Course {
 
 export const AREA_ORDER: Area[] = ["CB", "CBI", "IA", "FC", "ESP"];
 
+// Paleta "scrapbook": cada área es un color de pegatina sólido. `bg` se usa
+// para el estado relleno (cursando/vista); `text` es el color del texto
+// sobre ese relleno; `border` es siempre la tinta (ink) del boceto.
 export const AREA_INFO: Record<
   Area,
   { label: string; bg: string; border: string; text: string }
 > = {
   CB: {
     label: "Ciencias Básicas",
-    bg: "#FFD966",
-    border: "#D4A017",
-    text: "#4A3800",
+    bg: "var(--color-cobalt)",
+    border: "var(--color-ink)",
+    text: "var(--color-cream)",
   },
   CBI: {
     label: "Ciencias Básicas de Ingeniería",
-    bg: "#A9D18E",
-    border: "#548235",
-    text: "#274016",
+    bg: "var(--color-grass)",
+    border: "var(--color-ink)",
+    text: "var(--color-cream)",
   },
   IA: {
     label: "Ingeniería Aplicada",
-    bg: "#F4B6B0",
-    border: "#C0504D",
-    text: "#5C1A17",
+    bg: "var(--color-tomato)",
+    border: "var(--color-ink)",
+    text: "var(--color-cream)",
   },
   FC: {
     label: "Formación Complementaria",
-    bg: "#9DC3E6",
-    border: "#2E5F8A",
-    text: "#122B40",
+    bg: "var(--color-tangerine)",
+    border: "var(--color-ink)",
+    text: "var(--color-ink)",
   },
   ESP: {
     label: "Profundización / Grado",
-    bg: "#D9D9D9",
-    border: "#8C8C8C",
-    text: "#333333",
+    bg: "var(--color-bubblegum)",
+    border: "var(--color-ink)",
+    text: "var(--color-ink)",
   },
 };
 
