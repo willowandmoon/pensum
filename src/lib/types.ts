@@ -2,6 +2,47 @@ export type Area = "CB" | "CBI" | "IA" | "FC" | "ESP";
 
 export type Status = "pending" | "current" | "completed";
 
+// Estado visual real de una materia (combina el status guardado con si está
+// bloqueada por prerrequisitos). Se usa para colorear tarjetas y listas de
+// forma consistente en toda la app.
+export type VisualStatus = "completed" | "current" | "blocked" | "available";
+
+export function getVisualStatus(status: Status, locked: boolean): VisualStatus {
+  if (status === "completed") return "completed";
+  if (status === "current") return "current";
+  return locked ? "blocked" : "available";
+}
+
+export const STATUS_INFO: Record<
+  VisualStatus,
+  { label: string; bg: string; border: string; text: string }
+> = {
+  completed: {
+    label: "Vista",
+    bg: "var(--color-grass)",
+    border: "var(--color-ink)",
+    text: "var(--color-cream)",
+  },
+  current: {
+    label: "Este semestre",
+    bg: "var(--color-cobalt)",
+    border: "var(--color-ink)",
+    text: "var(--color-cream)",
+  },
+  available: {
+    label: "Disponible",
+    bg: "var(--color-tangerine)",
+    border: "var(--color-ink)",
+    text: "var(--color-ink)",
+  },
+  blocked: {
+    label: "Bloqueada",
+    bg: "#b7b7ae",
+    border: "var(--color-ink)",
+    text: "var(--color-ink)",
+  },
+};
+
 export interface Career {
   value: string;
   label: string;

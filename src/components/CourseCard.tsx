@@ -1,6 +1,6 @@
 "use client";
 
-import { AREA_INFO, Course, Status } from "@/lib/types";
+import { AREA_INFO, Course, getVisualStatus, STATUS_INFO, Status } from "@/lib/types";
 import { Check, Lock, Sparkle } from "./doodles";
 
 const NEXT_STATUS: Record<Status, Status> = {
@@ -35,11 +35,11 @@ export default function CourseCard({
   cardRef: (el: HTMLButtonElement | null) => void;
 }) {
   const area = AREA_INFO[course.area];
-  const isCompleted = status === "completed";
-  const isCurrent = status === "current";
-  // Bloqueada solo importa mientras siga pendiente (aún no la empezaste).
-  const isBlocked = locked && !isCompleted && !isCurrent;
-  const filled = isCompleted || isCurrent;
+  const visual = getVisualStatus(status, locked);
+  const state = STATUS_INFO[visual];
+  const isCompleted = visual === "completed";
+  const isCurrent = visual === "current";
+  const isBlocked = visual === "blocked";
   const tilt = TILT[index % TILT.length];
 
   return (
@@ -93,29 +93,31 @@ export default function CourseCard({
           denied ? "animate-[shake_0.4s_ease-in-out]" : "",
         ].join(" ")}
         style={{
-          background: filled ? area.bg : "var(--color-cream)",
-          color: filled ? area.text : "var(--color-ink)",
-          borderColor: denied ? "var(--color-tomato)" : "var(--color-ink)",
-          filter: isBlocked ? "saturate(0.5)" : undefined,
+          background: state.bg,
+          color: state.text,
+          borderColor: denied ? "var(--color-tomato)" : state.border,
         }}
       >
         <div className="flex items-start justify-between gap-2">
-          <span
-            className={[
-              "font-display text-[13px] font-semibold leading-snug",
-              isCompleted ? "line-through opacity-70" : "",
-            ].join(" ")}
-          >
-            {course.name}
-          </span>
+          <div className="flex min-w-0 items-start gap-1.5">
+            <span
+              aria-hidden="true"
+              title={area.label}
+              className="mt-1 h-2 w-2 shrink-0 rounded-full border"
+              style={{ background: area.bg, borderColor: "var(--color-ink)" }}
+            />
+            <span
+              className={[
+                "font-display text-[13px] font-semibold leading-snug",
+                isCompleted ? "line-through opacity-70" : "",
+              ].join(" ")}
+            >
+              {course.name}
+            </span>
+          </div>
           <span
             aria-hidden="true"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 font-display text-[11px] font-bold"
-            style={{
-              borderColor: "var(--color-ink)",
-              background: filled ? "var(--color-cream)" : area.bg,
-              color: filled ? "var(--color-ink)" : area.text,
-            }}
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-cream font-display text-[11px] font-bold text-ink"
           >
             {course.credits}
           </span>
@@ -125,30 +127,30 @@ export default function CourseCard({
           {isCompleted && (
             <span className="inline-flex items-center gap-1 rounded-full border-2 border-ink bg-cream px-2 py-0.5 font-sans text-[9px] font-extrabold uppercase tracking-wide text-ink">
               <Check className="h-2.5 w-2.5 text-grass" />
-              Vista
+              {state.label}
             </span>
           )}
           {isCurrent && (
             <span className="inline-flex items-center gap-1 rounded-full border-2 border-ink bg-cream px-2 py-0.5 font-sans text-[9px] font-extrabold uppercase tracking-wide text-ink">
-              <Sparkle className="h-2.5 w-2.5 text-tangerine" />
-              Este semestre
+              <Sparkle className="h-2.5 w-2.5 text-cobalt" />
+              {state.label}
             </span>
           )}
           {isBlocked && (
-            <span className="inline-flex items-center gap-1 rounded-full border-2 border-ink bg-[color:var(--color-paper-deep)] px-2 py-0.5 font-sans text-[9px] font-extrabold uppercase tracking-wide text-ink">
+            <span className="inline-flex items-center gap-1 rounded-full border-2 border-ink bg-cream px-2 py-0.5 font-sans text-[9px] font-extrabold uppercase tracking-wide text-ink">
               <Lock className="h-2.5 w-2.5 text-ink" />
-              Bloqueada
+              {state.label}
             </span>
           )}
           {!isCompleted && !isCurrent && !isBlocked && (
-            <span className="inline-flex items-center gap-1 rounded-full border-2 border-ink bg-grass px-2 py-0.5 font-sans text-[9px] font-extrabold uppercase tracking-wide text-cream">
-              Disponible
+            <span className="inline-flex items-center gap-1 rounded-full border-2 border-ink bg-cream px-2 py-0.5 font-sans text-[9px] font-extrabold uppercase tracking-wide text-ink">
+              {state.label}
             </span>
           )}
         </div>
 
         {isCurrent && (
-          <Sparkle className="pointer-events-none absolute -right-2 -top-2 z-20 h-4 w-4 text-tangerine drop-shadow" />
+          <Sparkle className="pointer-events-none absolute -right-2 -top-2 z-20 h-4 w-4 text-cobalt drop-shadow" />
         )}
       </button>
     </div>

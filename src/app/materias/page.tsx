@@ -2,14 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { useApp } from "@/lib/AppContext";
-import { AREA_INFO, Course, Grade, MAX_SCORE, PASSING_SCORE, summarizeGrades } from "@/lib/types";
+import {
+  AREA_INFO,
+  Course,
+  getVisualStatus,
+  Grade,
+  MAX_SCORE,
+  PASSING_SCORE,
+  STATUS_INFO,
+  Status,
+  summarizeGrades,
+} from "@/lib/types";
 import { IconPlus, IconTrash } from "@/components/doodles";
-
-const STATUS_LABEL: Record<string, { label: string; bg: string; text: string }> = {
-  completed: { label: "Vista", bg: "var(--color-grass)", text: "var(--color-cream)" },
-  current: { label: "Cursando", bg: "var(--color-cobalt)", text: "var(--color-cream)" },
-  pending: { label: "Disponible", bg: "var(--color-paper-deep)", text: "var(--color-ink)" },
-};
 
 export default function MateriasPage() {
   const { courses, statuses, lockedCodes, grades, addGrade, deleteGrade } = useApp();
@@ -67,6 +71,8 @@ export default function MateriasPage() {
                 <div className="space-y-1.5">
                   {list.map((course) => {
                     const status = statuses[course.code] ?? "pending";
+                    const visual = getVisualStatus(status, lockedCodes.has(course.code));
+                    const state = STATUS_INFO[visual];
                     const area = AREA_INFO[course.area];
                     const active = selected === course.code;
                     return (
@@ -90,11 +96,11 @@ export default function MateriasPage() {
                         <span
                           className="shrink-0 rounded-full border border-ink px-1.5 py-0.5 text-[9px] font-bold"
                           style={{
-                            background: active ? "var(--color-cream)" : STATUS_LABEL[status].bg,
-                            color: active ? "var(--color-ink)" : STATUS_LABEL[status].text,
+                            background: active ? "var(--color-cream)" : state.bg,
+                            color: active ? "var(--color-ink)" : state.text,
                           }}
                         >
-                          {STATUS_LABEL[status].label}
+                          {state.label}
                         </span>
                       </button>
                     );
@@ -142,7 +148,7 @@ function CourseDetail({
   onDeleteGrade,
 }: {
   course: Course;
-  status: string;
+  status: Status;
   locked: boolean;
   grades: Grade[];
   onAddGrade: (
@@ -205,14 +211,15 @@ function CourseDetail({
               {area.label}
             </p>
           </div>
-          <span className="rounded-full border-2 border-ink bg-cream px-3 py-1 text-xs font-bold text-ink">
-            {locked && status === "pending"
-              ? "Bloqueada"
-              : status === "completed"
-                ? "Vista"
-                : status === "current"
-                  ? "Cursando"
-                  : "Disponible"}
+          <span
+            className="rounded-full border-2 px-3 py-1 text-xs font-bold"
+            style={{
+              background: STATUS_INFO[getVisualStatus(status, locked)].bg,
+              color: STATUS_INFO[getVisualStatus(status, locked)].text,
+              borderColor: "var(--color-ink)",
+            }}
+          >
+            {STATUS_INFO[getVisualStatus(status, locked)].label}
           </span>
         </div>
       </div>
