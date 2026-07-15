@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const username = req.nextUrl.searchParams.get("username")?.trim().toLowerCase();
 
   const courses = await sql`
-    SELECT code, name, level, credits, area, prereqs
+    SELECT code, name, level, credits, area, prereqs, coreqs
     FROM courses
     ORDER BY level ASC, name ASC
   `;
@@ -14,12 +14,12 @@ export async function GET(req: NextRequest) {
 
   if (username) {
     const rows = await sql`
-      SELECT c.code, c.status
-      FROM user_course_status c
-      JOIN users u ON u.id = c.user_id
+      SELECT ucs.course_code, ucs.status
+      FROM user_course_status ucs
+      JOIN users u ON u.id = ucs.user_id
       WHERE u.username = ${username}
     `;
-    statuses = Object.fromEntries(rows.map((r) => [r.code, r.status]));
+    statuses = Object.fromEntries(rows.map((r) => [r.course_code, r.status]));
   }
 
   return NextResponse.json({ courses, statuses });
