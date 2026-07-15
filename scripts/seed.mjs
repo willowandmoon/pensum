@@ -144,6 +144,16 @@ async function main() {
   // Semestre actual (el usuario lo indica manualmente en Ajustes).
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_semester INT`;
 
+  // Promedio de partida: cuando el estudiante empieza a usar la app ya trae
+  // un historial académico previo. Estos valores se capturan UNA VEZ en
+  // Ajustes (junto con una "foto" de qué materias y créditos tenía vistas en
+  // ese momento) y desde ahí la app combina esa base con las notas nuevas
+  // que se vayan registrando en Mis materias para recalcular solo.
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS baseline_average NUMERIC(3,2)`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS baseline_semester_average NUMERIC(3,2)`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS baseline_credits INT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS baseline_course_codes TEXT[] NOT NULL DEFAULT '{}'`;
+
   // Notas: cada materia puede tener varias notas parciales (descripción, nota
   // obtenida sobre 5.0, porcentaje que vale).
   await sql`

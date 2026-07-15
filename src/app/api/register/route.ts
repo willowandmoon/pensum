@@ -43,7 +43,8 @@ export async function POST(req: NextRequest) {
   const rows = await sql`
     INSERT INTO users (name, email, password_hash, career)
     VALUES (${name}, ${email}, ${passwordHash}, ${career})
-    RETURNING email, name, career, current_semester
+    RETURNING email, name, career, current_semester,
+              baseline_average, baseline_semester_average, baseline_credits, baseline_course_codes
   `;
   const row = rows[0];
 
@@ -53,6 +54,11 @@ export async function POST(req: NextRequest) {
       name: row.name,
       career: row.career,
       currentSemester: row.current_semester,
+      baselineAverage: row.baseline_average !== null ? Number(row.baseline_average) : null,
+      baselineSemesterAverage:
+        row.baseline_semester_average !== null ? Number(row.baseline_semester_average) : null,
+      baselineCredits: row.baseline_credits,
+      baselineCourseCodes: row.baseline_course_codes ?? [],
     },
   });
 }

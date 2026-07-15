@@ -2,8 +2,14 @@
 
 import { useMemo } from "react";
 import { useApp } from "@/lib/AppContext";
-import { IconBoard, IconBook, IconCalendar, IconChart, Sparkle } from "@/components/doodles";
-import { MAX_SCORE, TOTAL_CREDITS, summarizeGrades } from "@/lib/types";
+import { IconBoard, IconBook, IconCalendar, IconChart } from "@/components/doodles";
+import { TOTAL_CREDITS, summarizeGrades } from "@/lib/types";
+
+// Formato colombiano: coma como separador decimal (3,9 en vez de 3.9).
+function formatAverage(value: number | null): string {
+  if (value === null) return "—";
+  return value.toFixed(1).replace(".", ",");
+}
 
 function StatCard({
   icon,
@@ -83,34 +89,61 @@ export default function EstadisticasPage() {
   const remainingCount = courses.length - completedCount;
   const remainingCredits = TOTAL_CREDITS - completedCredits;
 
-  const generalAverage = useMemo(() => {
-    const byCourse = new Map<string, typeof grades>();
+  const gradesByCourse = useMemo(() => {
+    const map = new Map<string, typeof grades>();
     for (const g of grades) {
-      if (!byCourse.has(g.courseCode)) byCourse.set(g.courseCode, []);
-      byCourse.get(g.courseCode)!.push(g);
+      if (!map.has(g.courseCode)) map.set(g.courseCode, []);
+      map.get(g.courseCode)!.push(g);
     }
-    const finals: number[] = [];
-    for (const [code, courseGrades] of byCourse) {
-      if (statuses[code] !== "completed") continue;
-      const summary = summarizeGrades(courseGrades);
-      if (summary.isFinal) finals.push(summary.accumulated);
-    }
-    if (finals.length === 0) return null;
-    return finals.reduce((a, b) => a + b, 0) / finals.length;
-  }, [grades, statuses]);
+    return map;
+  }, [grades]);
 
-  const averageLabel =
-    generalAverage === null
-      ? "Sin datos"
-      : generalAverage >= 4.5
-        ? "Excelente"
-        : generalAverage >= 4.0
-          ? "Muy bueno"
-          : generalAverage >= 3.5
-            ? "Bueno"
-            : generalAverage >= 3.0
-              ? "Aceptable"
-              : "Necesita mejorar";
+  const courseByCode = useMemo(() => {
+    const map = new Map<string, (typeof courses)[number]>();
+    for (const c of courses) map.set(c.code, c);
+    return map;
+  }, [courses]);
+
+  // Acumulado: combina el punto de partida (Ajustes) con las materias que ya
+  // viste y calificaste DESPUÉS de ese punto de partida.
+  const accumulatedAverage = useMemo(() => {
+    const baselineCredits = user.baselineCredits ?? 0;
+    const baselineCourseCodes = user.baselineCourseCodes ?? [];
+    const baselinePoints = (user.baselineAverage ?? 0) * baselineCredits;
+
+    let newPoints = 0;
+    let newCredits = 0;
+    for (const [code, courseGrades] of gradesByCourse) {
+      if (statuses[code] !== "completed") continue;
+      if (baselineCourseCodes.includes(code)) continue;
+      const summary = summarizeGrades(courseGrades);
+      if (!summary.isFinal) continue;
+      const credits = courseByCode.get(code)?.credits ?? 0;
+      newPoints += summary.accumulated * credits;
+      newCredits += credits;
+    }
+
+    const totalCredits = baselineCredits + newCredits;
+    if (totalCredits === 0) return user.baselineAverage ?? null;
+    return (baselinePoints + newPoints) / totalCredits;
+  }, [gradesByCourse, statuses, courseByCode, user]);
+
+  // Semestral: promedio (ponderado por créditos) de las materias que estás
+  // cursando ahora mismo, según lo que llevas registrado en Mis materias.
+  const semesterAverage = useMemo(() => {
+    let points = 0;
+    let credits = 0;
+    for (const c of courses) {
+      if (statuses[c.code] !== "current") continue;
+      const courseGrades = gradesByCourse.get(c.code) ?? [];
+      const summary = summarizeGrades(courseGrades);
+      if (summary.currentAverage === null) continue;
+      points += summary.currentAverage * c.credits;
+      credits += c.credits;
+    }
+    if (credits === 0) return user.baselineSemesterAverage ?? null;
+    return points / credits;
+  }, [courses, statuses, gradesByCourse, user]);
 
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
@@ -145,7 +178,7 @@ export default function EstadisticasPage() {
         </p>
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<IconBoard className="h-4 w-4 text-cream" />}
           iconBg="var(--color-grass)"
@@ -180,15 +213,31 @@ export default function EstadisticasPage() {
           sub={`${remainingCredits} créditos`}
           subColor="var(--color-tangerine)"
         />
-        <StatCard
-          icon={<Sparkle className="h-4 w-4 text-ink" />}
-          iconBg="var(--color-cream)"
-          title="Promedio general"
-          value={generalAverage === null ? "—" : generalAverage.toFixed(1)}
-          suffix={generalAverage === null ? undefined : `/ ${MAX_SCORE.toFixed(1)}`}
-          sub={averageLabel}
-          subColor="var(--color-ink)"
-        />
+      </div>
+
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:max-w-md">
+        <div className="rounded-2xl border-[2.5px] border-ink bg-cream p-4 text-center shadow-hard">
+          <p className="font-display text-3xl font-bold text-ink">
+            {formatAverage(semesterAverage)}
+          </p>
+          <p className="text-xs font-bold text-cobalt">(Semestral)</p>
+          <p className="mt-2 text-[11px] font-semibold text-ink/40">Promedio pregrado</p>
+          {user.currentSemester && (
+            <p className="text-[11px] font-semibold text-ink/40">
+              Semestre {user.currentSemester}
+            </p>
+          )}
+        </div>
+        <div className="rounded-2xl border-[2.5px] border-ink bg-cream p-4 text-center shadow-hard">
+          <p className="font-display text-3xl font-bold text-ink">
+            {formatAverage(accumulatedAverage)}
+          </p>
+          <p className="text-xs font-bold text-grass">(Acumulado)</p>
+          <p className="mt-2 text-[11px] font-semibold text-ink/40">Promedio pregrado</p>
+          <p className="text-[11px] font-semibold text-ink/40">
+            {completedCredits} créditos vistos
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[auto_1fr]">
@@ -245,13 +294,16 @@ export default function EstadisticasPage() {
           </div>
           <div className="rounded-3xl border-[2.5px] border-ink bg-cream p-5 shadow-hard">
             <h3 className="mb-3 font-display text-sm font-bold text-ink">
-              Cómo se calcula el promedio general
+              Cómo se calculan tus promedios
             </h3>
             <p className="text-sm font-semibold text-ink/70">
-              Es el promedio de la nota final de las materias que ya viste y que tienen
-              el 100% de sus notas registradas en{" "}
-              <span className="font-bold">Mis materias</span>. Si aún no has
-              registrado notas, aquí verás &quot;Sin datos&quot;.
+              <span className="font-bold">Semestral</span>: el promedio ponderado de las
+              materias que marcaste como &quot;cursando&quot; y ya tienen notas en{" "}
+              <span className="font-bold">Mis materias</span>.{" "}
+              <span className="font-bold">Acumulado</span>: combina el promedio de
+              partida que guardaste en <span className="font-bold">Ajustes</span> con
+              las materias que ya viste y calificaste después. Si aún no has
+              registrado notas nuevas, verás el valor que guardaste en Ajustes.
             </p>
           </div>
         </div>

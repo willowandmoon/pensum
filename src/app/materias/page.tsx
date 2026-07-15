@@ -311,10 +311,10 @@ function CourseDetail({
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             type="number"
-            step="1"
-            min="1"
+            step="0.1"
+            min="0.1"
             max="100"
-            placeholder="Vale %"
+            placeholder="Vale % (ej. 12.5)"
             className="rounded-xl border-2 border-ink bg-white px-3 py-2 text-sm font-semibold text-ink placeholder-ink/40 outline-none"
           />
           <button

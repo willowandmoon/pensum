@@ -18,6 +18,14 @@ export interface User {
   name: string;
   career: string;
   currentSemester: number | null;
+  // Punto de partida (se captura una sola vez en Ajustes): el promedio que
+  // ya traía el estudiante antes de usar la app, junto con una "foto" de qué
+  // materias/créditos tenía vistas en ese momento. Desde ahí la app combina
+  // esta base con las notas nuevas para recalcular el promedio solo.
+  baselineAverage: number | null;
+  baselineSemesterAverage: number | null;
+  baselineCredits: number | null;
+  baselineCourseCodes: string[];
 }
 
 export interface Course {

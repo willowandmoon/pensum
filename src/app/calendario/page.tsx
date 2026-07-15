@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useApp } from "@/lib/AppContext";
 import { AREA_INFO, DAY_LABELS } from "@/lib/types";
 import { IconPlus, IconTrash } from "@/components/doodles";
@@ -28,6 +28,22 @@ export default function CalendarioPage() {
   const [end, setEnd] = useState("09:00");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Zoom de la grilla del horario (mismo control que el tablero del Pensum).
+  const [zoom, setZoom] = useState(1);
+  const [natural, setNatural] = useState({ w: 0, h: 0 });
+  const gridRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function measure() {
+      if (!gridRef.current) return;
+      setNatural({ w: gridRef.current.scrollWidth, h: gridRef.current.scrollHeight });
+    }
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (gridRef.current) ro.observe(gridRef.current);
+    return () => ro.disconnect();
+  }, [scheduleBlocks, currentCourses]);
 
   const courseByCode = useMemo(() => {
     const map = new Map<string, (typeof courses)[number]>();
@@ -127,73 +143,113 @@ export default function CalendarioPage() {
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-3xl border-[2.5px] border-ink bg-cream p-4 shadow-hard">
-        <div className="flex min-w-[720px]">
-          <div className="w-14 shrink-0 pt-8">
-            {hours.map((h) => (
-              <div
-                key={h}
-                style={{ height: HOUR_HEIGHT }}
-                className="border-t border-ink/10 pr-2 text-right text-[11px] font-bold text-ink/40"
-              >
-                {String(h).padStart(2, "0")}:00
-              </div>
-            ))}
+      <div className="rounded-3xl border-[2.5px] border-ink bg-cream p-3 shadow-hard sm:p-4">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b-2 border-dashed border-ink/30 px-1 pb-3">
+          <span className="text-[11px] font-bold text-ink/50">Tu horario semanal</span>
+          <div className="flex items-center gap-1 rounded-full border-2 border-ink bg-[color:var(--color-paper-deep)] p-0.5 shadow-hard-sm">
+            <button
+              type="button"
+              onClick={() => setZoom((z) => Math.max(0.5, +(z / 1.2).toFixed(3)))}
+              className="flex h-7 w-7 items-center justify-center rounded-full font-bold text-ink transition hover:bg-cream"
+              aria-label="Alejar"
+            >
+              −
+            </button>
+            <span className="min-w-[3.2rem] text-center text-xs font-bold tabular-nums text-ink">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => setZoom((z) => Math.min(2, +(z * 1.2).toFixed(3)))}
+              className="flex h-7 w-7 items-center justify-center rounded-full font-bold text-ink transition hover:bg-cream"
+              aria-label="Acercar"
+            >
+              +
+            </button>
+            <button
+              type="button"
+              onClick={() => setZoom(1)}
+              className="ml-0.5 rounded-full px-2.5 py-1 text-xs font-bold text-ink transition hover:bg-cream"
+            >
+              Ajustar
+            </button>
           </div>
-          <div className="grid flex-1 grid-cols-6">
-            {DAY_LABELS.map((label, dayIndex) => (
-              <div key={label} className="relative border-l border-ink/10">
-                <div className="flex h-8 items-center justify-center border-b-2 border-ink/20 font-display text-xs font-bold text-ink/60">
-                  {label}
-                </div>
-                <div className="relative" style={{ height: gridHeight }}>
-                  {hours.map((h) => (
-                    <div
-                      key={h}
-                      style={{ height: HOUR_HEIGHT }}
-                      className="border-t border-ink/10"
-                    />
-                  ))}
-                  {scheduleBlocks
-                    .filter((b) => b.dayOfWeek === dayIndex)
-                    .map((b) => {
-                      const course = courseByCode.get(b.courseCode);
-                      const area = course ? AREA_INFO[course.area] : null;
-                      const top =
-                        ((timeToMinutes(b.startTime) - START_HOUR * 60) / 60) * HOUR_HEIGHT;
-                      const height =
-                        ((timeToMinutes(b.endTime) - timeToMinutes(b.startTime)) / 60) *
-                        HOUR_HEIGHT;
-                      return (
-                        <div
-                          key={b.id}
-                          className="group absolute left-0.5 right-0.5 overflow-hidden rounded-lg border-2 border-ink px-1.5 py-1 shadow-hard-sm"
-                          style={{
-                            top,
-                            height: Math.max(height, 24),
-                            background: area?.bg ?? "var(--color-paper-deep)",
-                            color: area?.text ?? "var(--color-ink)",
-                          }}
-                        >
-                          <p className="truncate text-[10px] font-bold leading-tight">
-                            {course?.name ?? b.courseCode}
-                          </p>
-                          <p className="truncate text-[9px] font-semibold opacity-80">
-                            {b.startTime} - {b.endTime}
-                          </p>
-                          <button
-                            onClick={() => deleteScheduleBlock(b.id)}
-                            aria-label="Quitar del horario"
-                            className="absolute right-0.5 top-0.5 hidden h-4 w-4 items-center justify-center rounded-full bg-cream text-ink group-hover:flex"
-                          >
-                            <IconTrash className="h-2.5 w-2.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                </div>
+        </div>
+
+        <div className="overflow-auto" style={{ maxHeight: "70vh" }}>
+          <div style={{ width: natural.w * zoom || undefined, height: natural.h * zoom || undefined }}>
+            <div
+              ref={gridRef}
+              className="flex w-max min-w-[720px]"
+              style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}
+            >
+              <div className="w-14 shrink-0 pt-8">
+                {hours.map((h) => (
+                  <div
+                    key={h}
+                    style={{ height: HOUR_HEIGHT }}
+                    className="border-t border-ink/10 pr-2 text-right text-[11px] font-bold text-ink/40"
+                  >
+                    {String(h).padStart(2, "0")}:00
+                  </div>
+                ))}
               </div>
-            ))}
+              <div className="grid flex-1 grid-cols-6">
+                {DAY_LABELS.map((label, dayIndex) => (
+                  <div key={label} className="relative border-l border-ink/10">
+                    <div className="flex h-8 items-center justify-center border-b-2 border-ink/20 font-display text-xs font-bold text-ink/60">
+                      {label}
+                    </div>
+                    <div className="relative" style={{ height: gridHeight }}>
+                      {hours.map((h) => (
+                        <div
+                          key={h}
+                          style={{ height: HOUR_HEIGHT }}
+                          className="border-t border-ink/10"
+                        />
+                      ))}
+                      {scheduleBlocks
+                        .filter((b) => b.dayOfWeek === dayIndex)
+                        .map((b) => {
+                          const course = courseByCode.get(b.courseCode);
+                          const area = course ? AREA_INFO[course.area] : null;
+                          const top =
+                            ((timeToMinutes(b.startTime) - START_HOUR * 60) / 60) * HOUR_HEIGHT;
+                          const height =
+                            ((timeToMinutes(b.endTime) - timeToMinutes(b.startTime)) / 60) *
+                            HOUR_HEIGHT;
+                          return (
+                            <div
+                              key={b.id}
+                              className="group absolute left-0.5 right-0.5 overflow-hidden rounded-lg border-2 border-ink px-1.5 py-1 shadow-hard-sm"
+                              style={{
+                                top,
+                                height: Math.max(height, 24),
+                                background: area?.bg ?? "var(--color-paper-deep)",
+                                color: area?.text ?? "var(--color-ink)",
+                              }}
+                            >
+                              <p className="truncate text-[10px] font-bold leading-tight">
+                                {course?.name ?? b.courseCode}
+                              </p>
+                              <p className="truncate text-[9px] font-semibold opacity-80">
+                                {b.startTime} - {b.endTime}
+                              </p>
+                              <button
+                                onClick={() => deleteScheduleBlock(b.id)}
+                                aria-label="Quitar del horario"
+                                className="absolute right-0.5 top-0.5 hidden h-4 w-4 items-center justify-center rounded-full bg-cream text-ink group-hover:flex"
+                              >
+                                <IconTrash className="h-2.5 w-2.5" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

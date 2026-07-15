@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
   }
 
   const rows = await sql`
-    SELECT email, name, career, password_hash, current_semester
+    SELECT email, name, career, password_hash, current_semester,
+           baseline_average, baseline_semester_average, baseline_credits, baseline_course_codes
     FROM users
     WHERE email = ${email}
   `;
@@ -34,6 +35,11 @@ export async function POST(req: NextRequest) {
       name: user.name,
       career: user.career,
       currentSemester: user.current_semester,
+      baselineAverage: user.baseline_average !== null ? Number(user.baseline_average) : null,
+      baselineSemesterAverage:
+        user.baseline_semester_average !== null ? Number(user.baseline_semester_average) : null,
+      baselineCredits: user.baseline_credits,
+      baselineCourseCodes: user.baseline_course_codes ?? [],
     },
   });
 }

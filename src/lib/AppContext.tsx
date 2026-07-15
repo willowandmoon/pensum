@@ -53,6 +53,10 @@ interface AppContextValue {
   ) => Promise<{ ok: boolean; error?: string }>;
   deleteScheduleBlock: (id: number) => Promise<void>;
   updateCurrentSemester: (semester: number | null) => Promise<void>;
+  updateBaselineAverages: (
+    semesterAverage: number | null,
+    cumulativeAverage: number | null
+  ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -275,6 +279,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [user]
   );
 
+  const updateBaselineAverages = useCallback(
+    async (semesterAverage: number | null, cumulativeAverage: number | null) => {
+      if (!user) return { ok: false, error: "No hay sesión activa." };
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          baselineSemesterAverage: semesterAverage,
+          baselineAverage: cumulativeAverage,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { ok: false, error: data.error ?? "Error de servidor." };
+      setUser(data.user);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user));
+      return { ok: true };
+    },
+    [user]
+  );
+
   if (!bootstrapped) return null;
 
   if (!user) {
@@ -301,6 +326,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addScheduleBlock,
     deleteScheduleBlock,
     updateCurrentSemester,
+    updateBaselineAverages,
     logout,
   };
 
