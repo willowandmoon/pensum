@@ -17,6 +17,7 @@ export interface User {
   email: string;
   name: string;
   career: string;
+  currentSemester: number | null;
 }
 
 export interface Course {
@@ -27,6 +28,71 @@ export interface Course {
   area: Area;
   prereqs: string[];
   coreqs: string[];
+}
+
+export interface Grade {
+  id: number;
+  courseCode: string;
+  description: string;
+  score: number;
+  weight: number;
+}
+
+export interface ScheduleBlock {
+  id: number;
+  courseCode: string;
+  dayOfWeek: number; // 0 = lunes ... 5 = sábado
+  startTime: string; // "07:00"
+  endTime: string; // "09:00"
+}
+
+export const PASSING_SCORE = 3.0;
+export const MAX_SCORE = 5.0;
+
+export const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+export interface GradeSummary {
+  weightEntered: number;
+  weightRemaining: number;
+  weightedSum: number;
+  currentAverage: number | null; // promedio de lo entregado hasta ahora (sobre 5.0)
+  accumulated: number; // aporte a la nota final si el resto queda en 0 (sobre 5.0)
+  neededOnRemaining: number | null; // lo que se necesita sacar en el % restante
+  guaranteedPass: boolean;
+  impossibleToPass: boolean;
+  isFinal: boolean; // ya se entregó el 100% del porcentaje
+}
+
+export function summarizeGrades(grades: Grade[]): GradeSummary {
+  const weightEntered = grades.reduce((s, g) => s + g.weight, 0);
+  const weightedSum = grades.reduce((s, g) => s + g.score * g.weight, 0);
+  const weightRemaining = Math.max(0, 100 - weightEntered);
+  const currentAverage = weightEntered > 0 ? weightedSum / weightEntered : null;
+  const accumulated = weightedSum / 100;
+  const isFinal = weightRemaining <= 0.01;
+
+  let neededOnRemaining: number | null = null;
+  let guaranteedPass = accumulated >= PASSING_SCORE;
+  let impossibleToPass = false;
+
+  if (!isFinal) {
+    const needed = (PASSING_SCORE * 100 - weightedSum) / weightRemaining;
+    neededOnRemaining = needed;
+    if (needed <= 0) guaranteedPass = true;
+    else if (needed > MAX_SCORE) impossibleToPass = true;
+  }
+
+  return {
+    weightEntered,
+    weightRemaining,
+    weightedSum,
+    currentAverage,
+    accumulated,
+    neededOnRemaining,
+    guaranteedPass,
+    impossibleToPass,
+    isFinal,
+  };
 }
 
 export const AREA_ORDER: Area[] = ["CB", "CBI", "IA", "FC", "ESP"];

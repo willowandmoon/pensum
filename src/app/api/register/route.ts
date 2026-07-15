@@ -43,8 +43,16 @@ export async function POST(req: NextRequest) {
   const rows = await sql`
     INSERT INTO users (name, email, password_hash, career)
     VALUES (${name}, ${email}, ${passwordHash}, ${career})
-    RETURNING email, name, career
+    RETURNING email, name, career, current_semester
   `;
+  const row = rows[0];
 
-  return NextResponse.json({ user: rows[0] });
+  return NextResponse.json({
+    user: {
+      email: row.email,
+      name: row.name,
+      career: row.career,
+      currentSemester: row.current_semester,
+    },
+  });
 }

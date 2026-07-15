@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   const rows = await sql`
-    SELECT email, name, career, password_hash
+    SELECT email, name, career, password_hash, current_semester
     FROM users
     WHERE email = ${email}
   `;
@@ -29,6 +29,11 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({
-    user: { email: user.email, name: user.name, career: user.career },
+    user: {
+      email: user.email,
+      name: user.name,
+      career: user.career,
+      currentSemester: user.current_semester,
+    },
   });
 }

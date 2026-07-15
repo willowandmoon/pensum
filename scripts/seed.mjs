@@ -141,6 +141,36 @@ async function main() {
     )
   `;
 
+  // Semestre actual (el usuario lo indica manualmente en Ajustes).
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_semester INT`;
+
+  // Notas: cada materia puede tener varias notas parciales (descripción, nota
+  // obtenida sobre 5.0, porcentaje que vale).
+  await sql`
+    CREATE TABLE IF NOT EXISTS course_grades (
+      id SERIAL PRIMARY KEY,
+      user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      course_code TEXT NOT NULL REFERENCES courses(code) ON DELETE CASCADE,
+      description TEXT NOT NULL,
+      score NUMERIC(4,2) NOT NULL,
+      weight NUMERIC(5,2) NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
+
+  // Horario: bloques de día/hora que el estudiante asigna a sus materias.
+  await sql`
+    CREATE TABLE IF NOT EXISTS schedule_blocks (
+      id SERIAL PRIMARY KEY,
+      user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      course_code TEXT NOT NULL REFERENCES courses(code) ON DELETE CASCADE,
+      day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+      start_time TEXT NOT NULL,
+      end_time TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
+
   console.log(`Insertando ${courses.length} materias...`);
   for (const [code, name, level, credits, area, prereqs, coreqs = []] of courses) {
     await sql`
