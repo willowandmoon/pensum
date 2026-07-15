@@ -140,6 +140,9 @@ async function main() {
       PRIMARY KEY (user_id, course_code)
     )
   `;
+  // Sticker elegido por el usuario para decorar una materia (reemplaza la
+  // cinta genérica de la esquina). Se limpia solo si la materia se borra.
+  await sql`ALTER TABLE user_course_status ADD COLUMN IF NOT EXISTS sticker TEXT`;
 
   // Semestre actual (el usuario lo indica manualmente en Ajustes).
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_semester INT`;

@@ -27,15 +27,19 @@ export async function GET(req: NextRequest) {
   `;
 
   let statuses: Record<string, string> = {};
+  let stickers: Record<string, string> = {};
 
   if (userId !== null) {
     const rows = await sql`
-      SELECT course_code, status
+      SELECT course_code, status, sticker
       FROM user_course_status
       WHERE user_id = ${userId}
     `;
     statuses = Object.fromEntries(rows.map((r) => [r.course_code, r.status]));
+    stickers = Object.fromEntries(
+      rows.filter((r) => r.sticker).map((r) => [r.course_code, r.sticker])
+    );
   }
 
-  return NextResponse.json({ courses, statuses });
+  return NextResponse.json({ courses, statuses, stickers });
 }

@@ -27,6 +27,7 @@ interface AppContextValue {
   user: User;
   courses: Course[];
   statuses: Record<string, Status>;
+  stickers: Record<string, string>;
   grades: Grade[];
   scheduleBlocks: ScheduleBlock[];
   courseByCode: Map<string, Course>;
@@ -38,6 +39,7 @@ interface AppContextValue {
   currentCount: number;
   pct: number;
   cycleStatus: (code: string, next: Status) => boolean;
+  setSticker: (code: string, sticker: string | null) => void;
   addGrade: (
     courseCode: string,
     description: string,
@@ -73,6 +75,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [bootstrapped, setBootstrapped] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [statuses, setStatuses] = useState<Record<string, Status>>({});
+  const [stickers, setStickers] = useState<Record<string, string>>({});
   const [grades, setGrades] = useState<Grade[]>([]);
   const [scheduleBlocks, setScheduleBlocks] = useState<ScheduleBlock[]>([]);
   const pendingSaves = useRef<Record<string, Promise<unknown>>>({});
@@ -96,6 +99,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .then((data) => {
         setCourses(data.courses ?? []);
         setStatuses(data.statuses ?? {});
+        setStickers(data.stickers ?? {});
       });
     fetch(`/api/grades?email=${encodeURIComponent(user.email)}`)
       .then((res) => res.json())
@@ -178,6 +182,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setCourses([]);
     setStatuses({});
+    setStickers({});
     setGrades([]);
     setScheduleBlocks([]);
   }
@@ -194,6 +199,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return copy;
       });
 
+      // La fila se borra al volver a "pending", así que su sticker también
+      // deja de aplicar (queda huérfano en la base de datos).
+      if (next === "pending") {
+        setStickers((prev) => {
+          if (!(code in prev)) return prev;
+          const copy = { ...prev };
+          delete copy[code];
+          return copy;
+        });
+      }
+
       const email = user.email;
       const previous = pendingSaves.current[code] ?? Promise.resolve();
       pendingSaves.current[code] = previous.then(() =>
@@ -206,6 +222,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return true;
     },
     [user, lockedCodes]
+  );
+
+  const setSticker = useCallback(
+    (code: string, sticker: string | null) => {
+      if (!user) return;
+
+      setStickers((prev) => {
+        const copy = { ...prev };
+        if (sticker === null) delete copy[code];
+        else copy[code] = sticker;
+        return copy;
+      });
+
+      const email = user.email;
+      const previous = pendingSaves.current[code] ?? Promise.resolve();
+      pendingSaves.current[code] = previous.then(() =>
+        fetch("/api/sticker", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, courseCode: code, sticker }),
+        }).catch(() => {})
+      );
+    },
+    [user]
   );
 
   const addGrade = useCallback(
@@ -310,6 +350,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     user,
     courses,
     statuses,
+    stickers,
     grades,
     scheduleBlocks,
     courseByCode,
@@ -321,6 +362,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     currentCount,
     pct,
     cycleStatus,
+    setSticker,
     addGrade,
     deleteGrade,
     addScheduleBlock,

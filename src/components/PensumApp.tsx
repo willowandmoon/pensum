@@ -5,6 +5,7 @@ import CourseCard from "./CourseCard";
 import PrereqLines from "./PrereqLines";
 import { useApp } from "@/lib/AppContext";
 import { COURSE_ROW, MAX_ROW } from "@/lib/types";
+import StickerPicker from "./StickerPicker";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
@@ -17,12 +18,22 @@ const SEMESTER_COLORS = [
 ];
 
 export default function PensumApp() {
-  const { courses, statuses, lockedCodes, coursesByLevel, creditsByLevel, cycleStatus } =
-    useApp();
+  const {
+    courses,
+    statuses,
+    stickers,
+    lockedCodes,
+    coursesByLevel,
+    creditsByLevel,
+    cycleStatus,
+    setSticker,
+  } = useApp();
 
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   // Materia que el usuario intentó marcar estando bloqueada (para animar rechazo).
   const [deniedCode, setDeniedCode] = useState<string | null>(null);
+  // Materia para la que se está eligiendo un sticker (abre el selector modal).
+  const [stickerPickerCode, setStickerPickerCode] = useState<string | null>(null);
   // Vista malla (diagrama con líneas) en pantallas anchas; vista apilada en móvil.
   const [isWide, setIsWide] = useState(true);
   // La malla se escala para caber completa (ancho + alto) en el área disponible.
@@ -110,7 +121,22 @@ export default function PensumApp() {
     return <p className="p-6 font-semibold text-ink/60">Cargando tu pensum...</p>;
   }
 
-  return isWide ? (
+  const stickerPickerCourse = stickerPickerCode ? courseByCode.get(stickerPickerCode) : null;
+
+  return (
+    <>
+      {stickerPickerCourse && (
+        <StickerPicker
+          courseName={stickerPickerCourse.name}
+          current={stickers[stickerPickerCourse.code] ?? null}
+          onSelect={(stickerId) => {
+            setSticker(stickerPickerCourse.code, stickerId);
+            setStickerPickerCode(null);
+          }}
+          onClose={() => setStickerPickerCode(null)}
+        />
+      )}
+      {isWide ? (
     <div className="rounded-3xl border-[3px] border-ink bg-cream p-3 shadow-hard sm:p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b-2 border-dashed border-ink/30 px-1 pb-3">
         <div className="flex flex-wrap items-center gap-4 text-[11px] font-bold text-ink/70">
@@ -211,6 +237,7 @@ export default function PensumApp() {
                     locked={lockedCodes.has(course.code)}
                     denied={deniedCode === course.code}
                     index={i}
+                    sticker={stickers[course.code] ?? null}
                     dimmed={relatedToHover !== null && !relatedToHover.has(course.code)}
                     highlighted={
                       relatedToHover !== null &&
@@ -219,6 +246,7 @@ export default function PensumApp() {
                     }
                     onCycle={handleCycle}
                     onHoverChange={setHoveredCode}
+                    onOpenStickerPicker={setStickerPickerCode}
                     cardRef={(el) => {
                       if (el) cardRefs.current.set(course.code, el);
                       else cardRefs.current.delete(course.code);
@@ -294,10 +322,12 @@ export default function PensumApp() {
                   locked={lockedCodes.has(course.code)}
                   denied={deniedCode === course.code}
                   index={idx}
+                  sticker={stickers[course.code] ?? null}
                   dimmed={false}
                   highlighted={false}
                   onCycle={handleCycle}
                   onHoverChange={() => {}}
+                  onOpenStickerPicker={setStickerPickerCode}
                   cardRef={() => {}}
                 />
               ))}
@@ -306,5 +336,8 @@ export default function PensumApp() {
         );
       })}
     </div>
+      )}
+    </>
   );
 }
+

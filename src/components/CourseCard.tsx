@@ -1,6 +1,6 @@
 "use client";
 
-import { AREA_INFO, Course, getVisualStatus, STATUS_INFO, Status } from "@/lib/types";
+import { AREA_INFO, Course, getVisualStatus, STATUS_INFO, Status, STICKERS } from "@/lib/types";
 import { Check, Lock, Sparkle } from "./doodles";
 
 const NEXT_STATUS: Record<Status, Status> = {
@@ -19,8 +19,10 @@ export default function CourseCard({
   dimmed,
   highlighted,
   index = 0,
+  sticker = null,
   onCycle,
   onHoverChange,
+  onOpenStickerPicker,
   cardRef,
 }: {
   course: Course;
@@ -30,11 +32,14 @@ export default function CourseCard({
   dimmed: boolean;
   highlighted: boolean;
   index?: number;
+  sticker?: string | null;
   onCycle: (code: string, next: Status) => void;
   onHoverChange: (code: string | null) => void;
+  onOpenStickerPicker?: (code: string) => void;
   cardRef: (el: HTMLButtonElement | null) => void;
 }) {
   const area = AREA_INFO[course.area];
+  const stickerInfo = sticker ? STICKERS.find((s) => s.id === sticker) ?? null : null;
   const visual = getVisualStatus(status, locked);
   const state = STATUS_INFO[visual];
   const isCompleted = visual === "completed";
@@ -50,18 +55,35 @@ export default function CourseCard({
         dimmed ? "opacity-30" : "opacity-100",
       ].join(" ")}
     >
-      {/* cinta washi para materias ya vistas */}
-      {isCompleted && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-2 -top-2 z-20 h-5 w-12 rotate-[22deg]"
-          style={{
-            background:
-              "repeating-linear-gradient(90deg, rgba(255,255,255,.6) 0 5px, rgba(255,255,255,.3) 5px 10px)",
-            border: "1px solid rgba(26,26,26,.4)",
-            boxShadow: "1px 1px 0 rgba(26,26,26,.3)",
+      {/* sticker elegido por el usuario para esta materia ya vista (o botón
+          para elegir uno, en vez de la cinta genérica de antes) */}
+      {isCompleted && onOpenStickerPicker && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenStickerPicker(course.code);
           }}
-        />
+          title={stickerInfo ? `Sticker: ${stickerInfo.label} (clic para cambiar)` : "Elegir un sticker"}
+          className="absolute -right-3 -top-3 z-20 flex h-11 w-11 rotate-[12deg] items-center justify-center transition hover:scale-110 hover:rotate-0"
+        >
+          {stickerInfo ? (
+            <img
+              src={stickerInfo.src}
+              alt={stickerInfo.label}
+              className="h-11 w-11 object-contain drop-shadow-[1px_2px_0_rgba(26,26,26,0.35)]"
+              draggable={false}
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed bg-cream text-xs font-bold text-ink/50"
+              style={{ borderColor: "var(--color-ink)" }}
+            >
+              +
+            </span>
+          )}
+        </button>
       )}
 
       {/* anillo punteado para "este semestre" */}

@@ -43,6 +43,32 @@ export const STATUS_INFO: Record<
   },
 };
 
+// Stickers que el usuario puede pegar en una materia ya vista, en vez de la
+// cinta genérica de la esquina. Los archivos viven en /public/stickers.
+export interface StickerOption {
+  id: string;
+  src: string;
+  label: string;
+}
+
+export const STICKERS: StickerOption[] = [
+  { id: "feliz", src: "/stickers/feliz.png", label: "Feliz" },
+  { id: "enamorado", src: "/stickers/enamorado.png", label: "Enamorado" },
+  { id: "genial", src: "/stickers/genial.png", label: "Genial" },
+  { id: "aplausos", src: "/stickers/aplausos.png", label: "Aplausos" },
+  { id: "curioso", src: "/stickers/curioso.png", label: "Curioso" },
+  { id: "sorprendido", src: "/stickers/sorprendido.png", label: "Sorprendido" },
+  { id: "relajado", src: "/stickers/relajado.png", label: "Relajado" },
+  { id: "dormido", src: "/stickers/dormido.png", label: "Dormido" },
+  { id: "indiferente", src: "/stickers/indiferente.png", label: "Indiferente" },
+  { id: "timido", src: "/stickers/timido.png", label: "Tímido" },
+  { id: "llorando", src: "/stickers/llorando.png", label: "Llorando" },
+  { id: "asustado-leve", src: "/stickers/asustado-leve.png", label: "Asustado" },
+  { id: "asustado", src: "/stickers/asustado.png", label: "Muy asustado" },
+  { id: "mareado", src: "/stickers/mareado.png", label: "Mareado" },
+  { id: "noqueado", src: "/stickers/noqueado.png", label: "Noqueado" },
+];
+
 export interface Career {
   value: string;
   label: string;
