@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Fredoka, Nunito } from "next/font/google";
+import { Quicksand, Mulish } from "next/font/google";
 import { AppProvider } from "@/lib/AppContext";
 import "./globals.css";
 
-// Estilo "scrapbook": Fredoka para títulos (redondeada, juguetona),
-// Nunito para el cuerpo (legible, cálida).
-const fredoka = Fredoka({
+// Estilo "scrapbook": Quicksand para títulos (redondeada, suave y liviana),
+// Mulish para el cuerpo (trazos finos, muy legible).
+const quicksand = Quicksand({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["500", "600", "700"],
 });
 
-const nunito = Nunito({
+const mulish = Mulish({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "600", "700", "800"],
@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${fredoka.variable} ${nunito.variable} h-full antialiased`}
+      className={`${quicksand.variable} ${mulish.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <AppProvider>{children}</AppProvider>
