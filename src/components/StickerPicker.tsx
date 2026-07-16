@@ -1,31 +1,39 @@
 "use client";
 
-import { STICKERS } from "@/lib/types";
+import { DEFAULT_STICKER_PACK, STICKER_PACKS } from "@/lib/types";
 
 export default function StickerPicker({
   courseName,
+  packId,
   current,
   onSelect,
   onClose,
 }: {
   courseName: string;
+  packId: string;
   current: string | null;
   onSelect: (stickerId: string | null) => void;
   onClose: () => void;
 }) {
+  const pack =
+    STICKER_PACKS.find((p) => p.id === packId) ??
+    STICKER_PACKS.find((p) => p.id === DEFAULT_STICKER_PACK)!;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-3xl border-[3px] border-ink bg-cream p-5 shadow-hard-lg"
+        className="flex max-h-[85vh] w-full max-w-md flex-col rounded-3xl border-[3px] border-ink bg-cream p-5 shadow-hard-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <h2 className="font-display text-base font-bold text-ink">Elige un sticker</h2>
-            <p className="text-xs font-semibold text-ink/50">{courseName}</p>
+            <p className="text-xs font-semibold text-ink/50">
+              {courseName} · pack {pack.label}
+            </p>
           </div>
           <button
             type="button"
@@ -37,8 +45,8 @@ export default function StickerPicker({
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">
-          {STICKERS.map((s) => (
+        <div className="grid grid-cols-4 gap-3 overflow-y-auto sm:grid-cols-5">
+          {pack.stickers.map((s) => (
             <button
               key={s.id}
               type="button"
@@ -58,7 +66,7 @@ export default function StickerPicker({
           <button
             type="button"
             onClick={() => onSelect(null)}
-            className="mt-4 w-full rounded-xl border-2 border-ink bg-cream px-3 py-2 font-display text-sm font-bold text-ink shadow-hard-sm transition hover:-translate-y-0.5"
+            className="mt-4 w-full shrink-0 rounded-xl border-2 border-ink bg-cream px-3 py-2 font-display text-sm font-bold text-ink shadow-hard-sm transition hover:-translate-y-0.5"
           >
             Quitar sticker
           </button>

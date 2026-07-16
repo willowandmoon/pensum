@@ -144,6 +144,9 @@ async function main() {
   // cinta genérica de la esquina). Se limpia solo si la materia se borra.
   await sql`ALTER TABLE user_course_status ADD COLUMN IF NOT EXISTS sticker TEXT`;
 
+  // Pack de stickers activo del usuario (ver STICKER_PACKS en lib/types.ts).
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS sticker_pack TEXT NOT NULL DEFAULT 'perrito'`;
+
   // Semestre actual (el usuario lo indica manualmente en Ajustes).
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_semester INT`;
 

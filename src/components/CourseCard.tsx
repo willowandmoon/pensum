@@ -1,6 +1,6 @@
 "use client";
 
-import { AREA_INFO, Course, getVisualStatus, STATUS_INFO, Status, STICKERS } from "@/lib/types";
+import { AREA_INFO, Course, getVisualStatus, STATUS_INFO, Status, STICKERS_BY_ID } from "@/lib/types";
 import { Check, Lock, Sparkle } from "./doodles";
 
 const NEXT_STATUS: Record<Status, Status> = {
@@ -39,7 +39,7 @@ export default function CourseCard({
   cardRef: (el: HTMLButtonElement | null) => void;
 }) {
   const area = AREA_INFO[course.area];
-  const stickerInfo = sticker ? STICKERS.find((s) => s.id === sticker) ?? null : null;
+  const stickerInfo = sticker ? STICKERS_BY_ID[sticker] ?? null : null;
   const visual = getVisualStatus(status, locked);
   const state = STATUS_INFO[visual];
   const isCompleted = visual === "completed";

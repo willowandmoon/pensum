@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { STICKERS } from "@/lib/types";
-
-const VALID_STICKERS = new Set(STICKERS.map((s) => s.id));
+import { STICKERS_BY_ID } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -10,7 +8,7 @@ export async function POST(req: NextRequest) {
   const courseCode = body?.courseCode;
   const sticker: string | null = body?.sticker ?? null;
 
-  if (!email || !courseCode || (sticker !== null && !VALID_STICKERS.has(sticker))) {
+  if (!email || !courseCode || (sticker !== null && !STICKERS_BY_ID[sticker])) {
     return NextResponse.json({ error: "Datos inválidos." }, { status: 400 });
   }
 

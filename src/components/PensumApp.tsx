@@ -19,6 +19,7 @@ const SEMESTER_COLORS = [
 
 export default function PensumApp() {
   const {
+    user,
     courses,
     statuses,
     stickers,
@@ -128,6 +129,7 @@ export default function PensumApp() {
       {stickerPickerCourse && (
         <StickerPicker
           courseName={stickerPickerCourse.name}
+          packId={user.stickerPack}
           current={stickers[stickerPickerCourse.code] ?? null}
           onSelect={(stickerId) => {
             setSticker(stickerPickerCourse.code, stickerId);

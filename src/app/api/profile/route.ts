@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { STICKER_PACKS } from "@/lib/types";
+
+const VALID_STICKER_PACKS = new Set(STICKER_PACKS.map((p) => p.id));
 
 function isValidSemester(v: unknown): v is number | null {
   return v === null || (typeof v === "number" && v >= 1 && v <= 10);
@@ -23,7 +26,11 @@ export async function POST(req: NextRequest) {
     body,
     "baselineSemesterAverage"
   );
+  const hasStickerPack = Object.prototype.hasOwnProperty.call(body, "stickerPack");
 
+  if (hasStickerPack && !VALID_STICKER_PACKS.has(body.stickerPack)) {
+    return NextResponse.json({ error: "Pack de stickers inválido." }, { status: 400 });
+  }
   if (hasCurrentSemester && !isValidSemester(body.currentSemester)) {
     return NextResponse.json({ error: "El semestre debe estar entre 1 y 10." }, { status: 400 });
   }
@@ -42,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   const userRows = await sql`
     SELECT id, current_semester, baseline_average, baseline_semester_average,
-           baseline_credits, baseline_course_codes
+           baseline_credits, baseline_course_codes, sticker_pack
     FROM users WHERE email = ${email}
   `;
   if (userRows.length === 0) {
@@ -58,6 +65,7 @@ export async function POST(req: NextRequest) {
     : user.baseline_semester_average;
   let baselineCredits = user.baseline_credits;
   let baselineCourseCodes = user.baseline_course_codes ?? [];
+  const stickerPack = hasStickerPack ? body.stickerPack : user.sticker_pack;
 
   // La "foto" de qué materias/créditos ya tenía vistas se captura UNA sola
   // vez, la primera vez que se guarda un promedio de partida.
@@ -77,10 +85,11 @@ export async function POST(req: NextRequest) {
         baseline_average = ${baselineAverage},
         baseline_semester_average = ${baselineSemesterAverage},
         baseline_credits = ${baselineCredits},
-        baseline_course_codes = ${baselineCourseCodes}
+        baseline_course_codes = ${baselineCourseCodes},
+        sticker_pack = ${stickerPack}
     WHERE id = ${userId}
     RETURNING email, name, career, current_semester, baseline_average,
-              baseline_semester_average, baseline_credits, baseline_course_codes
+              baseline_semester_average, baseline_credits, baseline_course_codes, sticker_pack
   `;
 
   const row = rows[0];
@@ -95,6 +104,7 @@ export async function POST(req: NextRequest) {
         row.baseline_semester_average !== null ? Number(row.baseline_semester_average) : null,
       baselineCredits: row.baseline_credits,
       baselineCourseCodes: row.baseline_course_codes ?? [],
+      stickerPack: row.sticker_pack,
     },
   });
 }

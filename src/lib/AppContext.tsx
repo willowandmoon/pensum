@@ -59,6 +59,7 @@ interface AppContextValue {
     semesterAverage: number | null,
     cumulativeAverage: number | null
   ) => Promise<{ ok: boolean; error?: string }>;
+  updateStickerPack: (packId: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -340,6 +341,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [user]
   );
 
+  const updateStickerPack = useCallback(
+    async (packId: string) => {
+      if (!user) return { ok: false, error: "No hay sesión activa." };
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email, stickerPack: packId }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { ok: false, error: data.error ?? "Error de servidor." };
+      setUser(data.user);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user));
+      return { ok: true };
+    },
+    [user]
+  );
+
   if (!bootstrapped) return null;
 
   if (!user) {
@@ -369,6 +387,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     deleteScheduleBlock,
     updateCurrentSemester,
     updateBaselineAverages,
+    updateStickerPack,
     logout,
   };
 

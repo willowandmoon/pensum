@@ -44,30 +44,113 @@ export const STATUS_INFO: Record<
 };
 
 // Stickers que el usuario puede pegar en una materia ya vista, en vez de la
-// cinta genérica de la esquina. Los archivos viven en /public/stickers.
+// cinta genérica de la esquina. Los archivos viven en /public/stickers/<pack>.
+// El usuario elige un pack activo en Ajustes; el id de cada sticker se guarda
+// con el prefijo del pack ("perrito/feliz") para que nunca choque con el id
+// de otro pack y siga siendo válido aunque luego cambie de pack.
 export interface StickerOption {
   id: string;
   src: string;
   label: string;
 }
 
-export const STICKERS: StickerOption[] = [
-  { id: "feliz", src: "/stickers/feliz.png", label: "Feliz" },
-  { id: "enamorado", src: "/stickers/enamorado.png", label: "Enamorado" },
-  { id: "genial", src: "/stickers/genial.png", label: "Genial" },
-  { id: "aplausos", src: "/stickers/aplausos.png", label: "Aplausos" },
-  { id: "curioso", src: "/stickers/curioso.png", label: "Curioso" },
-  { id: "sorprendido", src: "/stickers/sorprendido.png", label: "Sorprendido" },
-  { id: "relajado", src: "/stickers/relajado.png", label: "Relajado" },
-  { id: "dormido", src: "/stickers/dormido.png", label: "Dormido" },
-  { id: "indiferente", src: "/stickers/indiferente.png", label: "Indiferente" },
-  { id: "timido", src: "/stickers/timido.png", label: "Tímido" },
-  { id: "llorando", src: "/stickers/llorando.png", label: "Llorando" },
-  { id: "asustado-leve", src: "/stickers/asustado-leve.png", label: "Asustado" },
-  { id: "asustado", src: "/stickers/asustado.png", label: "Muy asustado" },
-  { id: "mareado", src: "/stickers/mareado.png", label: "Mareado" },
-  { id: "noqueado", src: "/stickers/noqueado.png", label: "Noqueado" },
+export interface StickerPack {
+  id: string;
+  label: string;
+  stickers: StickerOption[];
+}
+
+function pack(packId: string, label: string, items: [string, string][]): StickerPack {
+  return {
+    id: packId,
+    label,
+    stickers: items.map(([slug, stickerLabel]) => ({
+      id: `${packId}/${slug}`,
+      src: `/stickers/${packId}/${slug}.png`,
+      label: stickerLabel,
+    })),
+  };
+}
+
+export const STICKER_PACKS: StickerPack[] = [
+  pack("perrito", "Perrito", [
+    ["feliz", "Feliz"],
+    ["enamorado", "Enamorado"],
+    ["genial", "Genial"],
+    ["aplausos", "Aplausos"],
+    ["curioso", "Curioso"],
+    ["sorprendido", "Sorprendido"],
+    ["relajado", "Relajado"],
+    ["dormido", "Dormido"],
+    ["indiferente", "Indiferente"],
+    ["timido", "Tímido"],
+    ["llorando", "Llorando"],
+    ["asustado-leve", "Asustado"],
+    ["asustado", "Muy asustado"],
+    ["mareado", "Mareado"],
+    ["noqueado", "Noqueado"],
+  ]),
+  pack("kirby", "Kirby", [
+    ["feliz", "Feliz"],
+    ["super-feliz", "Súper feliz"],
+    ["emocionado", "Emocionado"],
+    ["carcajadas", "Riéndose a carcajadas"],
+    ["sonrisa-timida", "Sonrisa tímida"],
+    ["orgulloso", "Orgulloso"],
+    ["celebrando", "Celebrando"],
+    ["saltando-alegria", "Saltando de alegría"],
+    ["guinando-ojo", "Guiñando un ojo"],
+    ["enamorado", "Enamorado"],
+    ["beso", "Mandando un beso"],
+    ["abrazando-corazon", "Abrazando un corazón"],
+    ["sonrojado", "Sonrojado"],
+    ["muy-sonrojado", "Muy sonrojado"],
+    ["me-quieres", "¿Me quieres?"],
+    ["coqueto", "Coqueto"],
+    ["carinoso", "Cariñoso"],
+    ["triste", "Triste"],
+    ["llorando", "Llorando"],
+    ["llorando-mucho", "Llorando mucho"],
+    ["puchero", "Puchero"],
+    ["enojado", "Enojado"],
+    ["muy-enojado", "Muy enojado"],
+    ["furioso", "Furioso"],
+    ["asustado", "Asustado"],
+    ["panico", "En pánico"],
+    ["sorprendido", "Sorprendido"],
+    ["confundido", "Confundido"],
+    ["pensando", "Pensando"],
+    ["idea", "Idea"],
+    ["mente-explotando", "Mente explotando"],
+    ["cansado", "Cansado"],
+    ["con-sueno", "Con sueño"],
+    ["durmiendo", "Durmiendo"],
+    ["hambreado", "Hambreado"],
+    ["pizza", "Comiendo pizza"],
+    ["hamburguesa", "Comiendo hamburguesa"],
+    ["helado", "Comiendo helado"],
+    ["cafe", "Tomando café"],
+    ["jugando", "Jugando"],
+    ["programando", "Programando"],
+    ["musica", "Escuchando música"],
+    ["paraguas", "Con paraguas"],
+    ["lluvia", "En la lluvia"],
+    ["gafas-sol", "Con gafas de sol"],
+    ["estrella", "Estrella"],
+    ["volando", "Volando"],
+    ["disfrazado", "Disfrazado"],
+    ["facepalm", "Facepalm"],
+    ["rage", "Rage"],
+  ]),
 ];
+
+export const DEFAULT_STICKER_PACK = STICKER_PACKS[0].id;
+
+// Mapa plano id -> sticker (para pintar en la tarjeta un sticker ya elegido,
+// sin importar cuál sea el pack activo del usuario en este momento).
+export const STICKERS_BY_ID: Record<string, StickerOption> = Object.fromEntries(
+  STICKER_PACKS.flatMap((p) => p.stickers.map((s) => [s.id, s]))
+);
 
 export interface Career {
   value: string;
@@ -93,6 +176,8 @@ export interface User {
   baselineSemesterAverage: number | null;
   baselineCredits: number | null;
   baselineCourseCodes: string[];
+  // Pack de stickers activo (id de STICKER_PACKS) para decorar materias vistas.
+  stickerPack: string;
 }
 
 export interface Course {

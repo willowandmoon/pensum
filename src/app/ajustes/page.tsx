@@ -2,13 +2,23 @@
 
 import { useState } from "react";
 import { useApp } from "@/lib/AppContext";
-import { CAREERS } from "@/lib/types";
+import { CAREERS, DEFAULT_STICKER_PACK, STICKER_PACKS } from "@/lib/types";
 import { IconLogout } from "@/components/doodles";
 
 export default function AjustesPage() {
-  const { user, updateCurrentSemester, updateBaselineAverages, logout } = useApp();
+  const { user, updateCurrentSemester, updateBaselineAverages, updateStickerPack, logout } =
+    useApp();
   const [semester, setSemester] = useState(user.currentSemester ? String(user.currentSemester) : "");
   const [saved, setSaved] = useState(false);
+  const activePack = user.stickerPack || DEFAULT_STICKER_PACK;
+  const [packSaving, setPackSaving] = useState<string | null>(null);
+
+  async function handleSelectPack(packId: string) {
+    if (packId === activePack || packSaving) return;
+    setPackSaving(packId);
+    await updateStickerPack(packId);
+    setPackSaving(null);
+  }
 
   // typeof (no !== null): sesiones con datos viejos en localStorage pueden
   // no tener estos campos (undefined) en vez de null.
@@ -107,6 +117,55 @@ export default function AjustesPage() {
             <span className="text-sm font-bold text-grass">Guardado.</span>
           )}
         </form>
+      </div>
+
+      <div className="mb-4 rounded-3xl border-[2.5px] border-ink bg-cream p-5 shadow-hard">
+        <h2 className="mb-1 font-display text-sm font-bold text-ink">Pack de stickers</h2>
+        <p className="mb-3 text-xs font-semibold text-ink/50">
+          Elige qué stickers puedes pegar en las materias que ya viste.
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {STICKER_PACKS.map((pack) => {
+            const isActive = pack.id === activePack;
+            return (
+              <button
+                key={pack.id}
+                type="button"
+                onClick={() => handleSelectPack(pack.id)}
+                disabled={packSaving !== null}
+                className={[
+                  "rounded-2xl border-2 p-3 text-left transition",
+                  isActive
+                    ? "border-ink bg-[color:var(--color-paper-deep)] shadow-hard-sm"
+                    : "border-ink/20 hover:-translate-y-0.5 hover:border-ink",
+                ].join(" ")}
+              >
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <span className="font-display text-sm font-bold text-ink">{pack.label}</span>
+                  {isActive && (
+                    <span className="rounded-full border-2 border-ink bg-grass px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-cream">
+                      Activo
+                    </span>
+                  )}
+                  {!isActive && packSaving === pack.id && (
+                    <span className="text-[10px] font-bold text-ink/40">Guardando...</span>
+                  )}
+                </div>
+                <div className="flex gap-1.5">
+                  {pack.stickers.slice(0, 5).map((s) => (
+                    <img
+                      key={s.id}
+                      src={s.src}
+                      alt={s.label}
+                      className="h-9 w-9 object-contain"
+                      draggable={false}
+                    />
+                  ))}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="mb-4 rounded-3xl border-[2.5px] border-ink bg-cream p-5 shadow-hard">
