@@ -81,7 +81,9 @@ export default function LoginScreen({
           </div>
           <h1 className="font-display text-2xl font-bold text-ink">Mi Pensum</h1>
           <Squiggle className="mx-auto mt-1 h-2.5 w-32 text-bubblegum" />
-          <p className="mt-2 text-sm font-semibold text-ink/70">Politécnico JIC</p>
+          <p className="mt-2 text-sm font-semibold text-ink/70">
+            Lleva el control de tu carrera
+          </p>
         </div>
 
         <div className="mb-5 flex rounded-full border-[2.5px] border-ink bg-[color:var(--color-paper-deep)] p-1">
@@ -147,7 +149,7 @@ export default function LoginScreen({
                 ))}
               </select>
               <p className="mt-1 text-xs font-semibold text-ink/50">
-                Por ahora solo hay pensum cargado para esta carrera.
+                El pensum de esta carrera ya está cargado en la app.
               </p>
             </div>
           )}

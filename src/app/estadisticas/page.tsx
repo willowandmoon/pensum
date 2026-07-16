@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useApp } from "@/lib/AppContext";
 import { IconBoard, IconBook, IconCalendar, IconChart } from "@/components/doodles";
-import { TOTAL_CREDITS, summarizeGrades } from "@/lib/types";
+import { CAREERS, summarizeGrades } from "@/lib/types";
 
 // Formato colombiano: coma como separador decimal (3,9 en vez de 3.9).
 function formatAverage(value: number | null): string {
@@ -61,7 +61,9 @@ function StatCard({
 }
 
 export default function EstadisticasPage() {
-  const { user, courses, statuses, lockedCodes, grades, completedCredits, pct } = useApp();
+  const { user, courses, statuses, lockedCodes, grades, totalCredits, completedCredits, pct } =
+    useApp();
+  const careerLabel = CAREERS.find((c) => c.value === user.career)?.label ?? user.career;
 
   const completedCount = useMemo(
     () => courses.filter((c) => statuses[c.code] === "completed").length,
@@ -87,7 +89,7 @@ export default function EstadisticasPage() {
   );
 
   const remainingCount = courses.length - completedCount;
-  const remainingCredits = TOTAL_CREDITS - completedCredits;
+  const remainingCredits = totalCredits - completedCredits;
 
   const gradesByCourse = useMemo(() => {
     const map = new Map<string, typeof grades>();
@@ -174,7 +176,7 @@ export default function EstadisticasPage() {
       <div className="mb-5">
         <h1 className="font-display text-xl font-bold text-ink">Estadísticas</h1>
         <p className="text-xs font-semibold text-ink/60">
-          Tu avance en Ingeniería Informática, de un vistazo.
+          Tu avance en {careerLabel}, de un vistazo.
         </p>
       </div>
 
@@ -184,7 +186,7 @@ export default function EstadisticasPage() {
           iconBg="var(--color-grass)"
           title="Créditos aprobados"
           value={`${completedCredits}`}
-          suffix={`/ ${TOTAL_CREDITS}`}
+          suffix={`/ ${totalCredits}`}
           progress={pct}
           sub={`${pct}%`}
           subColor="var(--color-grass)"
@@ -269,7 +271,7 @@ export default function EstadisticasPage() {
           <div className="-mt-[124px] flex flex-col items-center">
             <span className="font-display text-3xl font-bold text-ink">{pct}%</span>
             <span className="text-xs font-semibold text-ink/50">
-              {completedCredits} / {TOTAL_CREDITS} créditos
+              {completedCredits} / {totalCredits} créditos
             </span>
           </div>
           <div className="mt-8 w-full space-y-2">

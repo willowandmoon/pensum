@@ -18,7 +18,7 @@ const mulish = Mulish({
 });
 
 export const metadata: Metadata = {
-  title: "Mi Pensum · Ingeniería Informática",
+  title: "Mi Pensum",
   description: "Pensum interactivo para llevar tu avance académico",
 };
 

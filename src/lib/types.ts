@@ -1,4 +1,4 @@
-export type Area = "CB" | "CBI" | "IA" | "FC" | "ESP";
+export type Area = "CB" | "CBI" | "IA" | "FC" | "ESP" | "INST" | "FAC" | "PROG" | "ELEC";
 
 export type Status = "pending" | "current" | "completed";
 
@@ -205,12 +205,17 @@ export const STICKERS_BY_ID: Record<string, StickerOption> = Object.fromEntries(
 export interface Career {
   value: string;
   label: string;
+  // Texto corto bajo el título de "Pensum" (número de plan, código SNIES, etc).
+  planLabel: string;
 }
 
-// Por ahora solo hay pensum cargado para Ingeniería Informática.
-// Cuando se agregue otra carrera, solo hay que sumarla aquí.
 export const CAREERS: Career[] = [
-  { value: "ing-informatica", label: "Ingeniería Informática" },
+  { value: "ing-informatica", label: "Ingeniería Informática", planLabel: "Plan 8210" },
+  {
+    value: "administracion-empresas",
+    label: "Administración de Empresas",
+    planLabel: "SNIES 102847",
+  },
 ];
 
 export interface User {
@@ -305,7 +310,17 @@ export function summarizeGrades(grades: Grade[]): GradeSummary {
   };
 }
 
-export const AREA_ORDER: Area[] = ["CB", "CBI", "IA", "FC", "ESP"];
+export const AREA_ORDER: Area[] = [
+  "CB",
+  "CBI",
+  "IA",
+  "FC",
+  "ESP",
+  "INST",
+  "FAC",
+  "PROG",
+  "ELEC",
+];
 
 // Paleta "scrapbook": cada área es un color de pegatina sólido. `bg` se usa
 // para el estado relleno (cursando/vista); `text` es el color del texto
@@ -344,9 +359,33 @@ export const AREA_INFO: Record<
     border: "var(--color-ink)",
     text: "var(--color-ink)",
   },
+  // Áreas de Administración de Empresas (y otras carreras con este mismo
+  // esquema institucional): Institucional / Facultad / Programa / Electivo.
+  INST: {
+    label: "Institucional",
+    bg: "var(--color-cobalt)",
+    border: "var(--color-ink)",
+    text: "var(--color-cream)",
+  },
+  FAC: {
+    label: "Facultad",
+    bg: "var(--color-grass)",
+    border: "var(--color-ink)",
+    text: "var(--color-cream)",
+  },
+  PROG: {
+    label: "Programa",
+    bg: "var(--color-tangerine)",
+    border: "var(--color-ink)",
+    text: "var(--color-ink)",
+  },
+  ELEC: {
+    label: "Electivo",
+    bg: "var(--color-tomato)",
+    border: "var(--color-ink)",
+    text: "var(--color-cream)",
+  },
 };
-
-export const TOTAL_CREDITS = 166;
 
 // Fila fija de cada materia según el diagrama oficial (malla Plan 10).
 // Cada "riel" temático (Cálculo, Álgebra, Algoritmos, Software, etc.)
@@ -421,6 +460,56 @@ export const COURSE_ROW: Record<string, number> = {
   CBS00032: 12, // Humanidades 2
   ING01229: 12, // Electiva 2
   ING01230: 12, // Electiva 3
-};
 
-export const MAX_ROW = 12;
+  // --- Administración de Empresas (Politécnico Grancolombiano) ---
+  // La fila usa la misma posición de columna que ocupa la materia dentro
+  // de su semestre en el diagrama oficial (1ra columna = fila 1, etc).
+  // Fila 1
+  ADM001: 1, // Matemáticas
+  ADM005: 1, // Matemáticas II
+  ADM009: 1, // Microeconomía
+  ADM014: 1, // Macroeconomía
+  ADM019: 1, // Modelo de Toma de Decisiones
+  ADM024: 1, // Gerencia de Producción
+  ADM029: 1, // Gerencia de Desarrollo Sostenible
+  ADM034: 1, // Sistemas Integrados de Gestión (HSEQ)
+  ADM039: 1, // Habilidades Gerenciales
+  // Fila 2
+  ADM002: 2, // Contabilidad General
+  ADM006: 2, // Administración Financiera
+  ADM010: 2, // Estadística I
+  ADM015: 2, // Estadística II
+  ADM020: 2, // Administración 4.0
+  ADM025: 2, // Gestión del Talento Humano
+  ADM030: 2, // Finanzas Corporativas
+  ADM035: 2, // Gerencia Financiera
+  ADM040: 2, // Opción de Grado
+  // Fila 3
+  ADM003: 3, // Teoría de las Organizaciones
+  ADM007: 3, // Inglés General I
+  ADM011: 3, // Costos y Presupuestos
+  ADM016: 3, // Matemáticas Financieras
+  ADM021: 3, // Oportunidades para Emprender
+  ADM026: 3, // Evaluación de Proyectos
+  ADM031: 3, // Gestión de Proyectos I
+  ADM036: 3, // Gestión de Proyectos II
+  ADM041: 3, // Pensamiento Estratégico y Prospectiva
+  // Fila 4
+  ADM004: 4, // Create Camps I
+  ADM008: 4, // Create Camps II
+  ADM012: 4, // Proceso Administrativo
+  ADM017: 4, // Derecho Comercial y Laboral
+  ADM022: 4, // Fundamentos de Mercadeo
+  ADM027: 4, // Proceso Estratégico I
+  ADM032: 4, // Proceso Estratégico II
+  ADM037: 4, // Tendencias Estratégicas
+  ADM042: 4, // Desarrollo Empresarial
+  // Fila 5
+  ADM013: 5, // Inglés General II
+  ADM018: 5, // Inglés General III
+  ADM023: 5, // Inglés General IV
+  ADM028: 5, // Comercio Internacional
+  ADM033: 5, // Generalidades de Riesgo
+  ADM038: 5, // Electiva I
+  ADM043: 5, // Electiva II
+};

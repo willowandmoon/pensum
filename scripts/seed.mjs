@@ -90,7 +90,68 @@ const courses = [
   ["ING01230", "Electiva 3", 10, 2, "FC", []],
 ];
 
-const DEFAULT_CAREER = "ing-informatica";
+// Administración de Empresas — Politécnico Grancolombiano (SNIES 102847).
+// area: I=Institucional, F=Facultad, P=Programa, E=Electivo (mapeados a
+// INST/FAC/PROG/ELEC en lib/types.ts).
+const coursesAdministracion = [
+  // Nivel 1
+  ["ADM001", "Matemáticas", 1, 3, "INST", []],
+  ["ADM002", "Contabilidad General", 1, 3, "FAC", []],
+  ["ADM003", "Teoría de las Organizaciones", 1, 3, "FAC", []],
+  ["ADM004", "Create Camps I", 1, 6, "INST", []],
+  // Nivel 2
+  ["ADM005", "Matemáticas II", 2, 3, "FAC", ["ADM001"]],
+  ["ADM006", "Administración Financiera", 2, 3, "FAC", []],
+  ["ADM007", "Inglés General I", 2, 3, "PROG", []],
+  ["ADM008", "Create Camps II", 2, 6, "INST", []],
+  // Nivel 3
+  ["ADM009", "Microeconomía", 3, 3, "FAC", ["ADM001"]],
+  ["ADM010", "Estadística I", 3, 3, "FAC", ["ADM001"]],
+  ["ADM011", "Costos y Presupuestos", 3, 3, "PROG", ["ADM002"]],
+  ["ADM012", "Proceso Administrativo", 3, 3, "FAC", []],
+  ["ADM013", "Inglés General II", 3, 3, "PROG", ["ADM007"]],
+  // Nivel 4
+  ["ADM014", "Macroeconomía", 4, 3, "FAC", []],
+  ["ADM015", "Estadística II", 4, 3, "FAC", ["ADM010"]],
+  ["ADM016", "Matemáticas Financieras", 4, 3, "FAC", []],
+  ["ADM017", "Derecho Comercial y Laboral", 4, 3, "PROG", []],
+  ["ADM018", "Inglés General III", 4, 3, "PROG", ["ADM013"]],
+  // Nivel 5
+  ["ADM019", "Modelo de Toma de Decisiones", 5, 3, "FAC", ["ADM001"]],
+  ["ADM020", "Administración 4.0", 5, 3, "PROG", []],
+  ["ADM021", "Oportunidades para Emprender", 5, 3, "PROG", []],
+  ["ADM022", "Fundamentos de Mercadeo", 5, 3, "FAC", []],
+  ["ADM023", "Inglés General IV", 5, 3, "PROG", ["ADM018"]],
+  // Nivel 6
+  ["ADM024", "Gerencia de Producción", 6, 3, "PROG", []],
+  ["ADM025", "Gestión del Talento Humano", 6, 3, "FAC", []],
+  ["ADM026", "Evaluación de Proyectos", 6, 3, "PROG", ["ADM016"]],
+  ["ADM027", "Proceso Estratégico I", 6, 3, "PROG", ["ADM012"]],
+  ["ADM028", "Comercio Internacional", 6, 3, "PROG", []],
+  // Nivel 7
+  ["ADM029", "Gerencia de Desarrollo Sostenible", 7, 3, "PROG", []],
+  ["ADM030", "Finanzas Corporativas", 7, 3, "PROG", []],
+  ["ADM031", "Gestión de Proyectos I", 7, 3, "PROG", ["ADM021"]],
+  ["ADM032", "Proceso Estratégico II", 7, 3, "PROG", ["ADM027"]],
+  ["ADM033", "Generalidades de Riesgo", 7, 3, "PROG", []],
+  // Nivel 8
+  ["ADM034", "Sistemas Integrados de Gestión (HSEQ)", 8, 3, "PROG", []],
+  ["ADM035", "Gerencia Financiera", 8, 3, "FAC", ["ADM030"]],
+  ["ADM036", "Gestión de Proyectos II", 8, 3, "PROG", ["ADM031"]],
+  ["ADM037", "Tendencias Estratégicas", 8, 3, "PROG", []],
+  ["ADM038", "Electiva I", 8, 3, "ELEC", []],
+  // Nivel 9
+  ["ADM039", "Habilidades Gerenciales", 9, 3, "PROG", []],
+  ["ADM040", "Opción de Grado", 9, 3, "FAC", ["ADM026"]],
+  ["ADM041", "Pensamiento Estratégico y Prospectiva", 9, 3, "PROG", ["ADM027"]],
+  ["ADM042", "Desarrollo Empresarial", 9, 3, "PROG", ["ADM032"]],
+  ["ADM043", "Electiva II", 9, 3, "ELEC", []],
+];
+
+const CAREER_COURSE_LISTS = [
+  { career: "ing-informatica", list: courses },
+  { career: "administracion-empresas", list: coursesAdministracion },
+];
 
 async function main() {
   console.log("Creando tablas...");
@@ -187,20 +248,23 @@ async function main() {
     )
   `;
 
-  console.log(`Insertando ${courses.length} materias...`);
-  for (const [code, name, level, credits, area, prereqs, coreqs = []] of courses) {
-    await sql`
-      INSERT INTO courses (code, name, level, credits, area, prereqs, coreqs, career)
-      VALUES (${code}, ${name}, ${level}, ${credits}, ${area}, ${prereqs}, ${coreqs}, ${DEFAULT_CAREER})
-      ON CONFLICT (code) DO UPDATE SET
-        name = EXCLUDED.name,
-        level = EXCLUDED.level,
-        credits = EXCLUDED.credits,
-        area = EXCLUDED.area,
-        prereqs = EXCLUDED.prereqs,
-        coreqs = EXCLUDED.coreqs,
-        career = EXCLUDED.career
-    `;
+  const totalCourses = CAREER_COURSE_LISTS.reduce((sum, c) => sum + c.list.length, 0);
+  console.log(`Insertando ${totalCourses} materias...`);
+  for (const { career, list } of CAREER_COURSE_LISTS) {
+    for (const [code, name, level, credits, area, prereqs, coreqs = []] of list) {
+      await sql`
+        INSERT INTO courses (code, name, level, credits, area, prereqs, coreqs, career)
+        VALUES (${code}, ${name}, ${level}, ${credits}, ${area}, ${prereqs}, ${coreqs}, ${career})
+        ON CONFLICT (code) DO UPDATE SET
+          name = EXCLUDED.name,
+          level = EXCLUDED.level,
+          credits = EXCLUDED.credits,
+          area = EXCLUDED.area,
+          prereqs = EXCLUDED.prereqs,
+          coreqs = EXCLUDED.coreqs,
+          career = EXCLUDED.career
+      `;
+    }
   }
 
   const [{ count }] = await sql`SELECT count(*)::int FROM courses`;

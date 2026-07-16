@@ -1,18 +1,23 @@
 "use client";
 
 import PensumApp from "@/components/PensumApp";
-import { AREA_INFO, AREA_ORDER, STATUS_INFO, VisualStatus } from "@/lib/types";
+import { useApp } from "@/lib/AppContext";
+import { AREA_INFO, AREA_ORDER, CAREERS, STATUS_INFO, VisualStatus } from "@/lib/types";
 
 const STATUS_ORDER: VisualStatus[] = ["completed", "current", "available", "blocked"];
 
 export default function Page() {
+  const { user, courses } = useApp();
+  const planLabel = CAREERS.find((c) => c.value === user.career)?.planLabel ?? "";
+  const areasInUse = AREA_ORDER.filter((area) => courses.some((c) => c.area === area));
+
   return (
     <div className="mx-auto w-full max-w-[1700px] px-4 py-6 sm:px-6 sm:py-7 lg:px-8">
       <div className="mb-4 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-display text-xl font-bold text-ink">Pensum</h1>
-            <p className="text-xs font-semibold text-ink/60">Plan 8210</p>
+            <p className="text-xs font-semibold text-ink/60">{planLabel}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {STATUS_ORDER.map((key, i) => {
@@ -35,7 +40,7 @@ export default function Page() {
         </div>
         <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-ink/50">
           <span>Área:</span>
-          {AREA_ORDER.map((key) => {
+          {areasInUse.map((key) => {
             const info = AREA_INFO[key];
             return (
               <span key={key} className="flex items-center gap-1.5">

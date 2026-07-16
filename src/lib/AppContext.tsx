@@ -11,15 +11,7 @@ import {
 } from "react";
 import LoginScreen from "@/components/LoginScreen";
 import Sidebar from "@/components/Sidebar";
-import {
-  AREA_ORDER,
-  Course,
-  Grade,
-  ScheduleBlock,
-  Status,
-  TOTAL_CREDITS,
-  User,
-} from "@/lib/types";
+import { AREA_ORDER, Course, Grade, ScheduleBlock, Status, User } from "@/lib/types";
 
 const STORAGE_KEY = "pensum-user";
 
@@ -34,6 +26,7 @@ interface AppContextValue {
   coursesByLevel: Map<number, Course[]>;
   creditsByLevel: Map<number, { count: number; credits: number }>;
   lockedCodes: Set<string>;
+  totalCredits: number;
   completedCredits: number;
   currentCredits: number;
   currentCount: number;
@@ -150,6 +143,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return locked;
   }, [courses, statuses]);
 
+  const totalCredits = useMemo(
+    () => courses.reduce((sum, c) => sum + c.credits, 0),
+    [courses]
+  );
+
   const completedCredits = useMemo(
     () =>
       courses
@@ -171,7 +169,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [statuses]
   );
 
-  const pct = Math.min(100, Math.round((completedCredits / TOTAL_CREDITS) * 100));
+  const pct =
+    totalCredits > 0 ? Math.min(100, Math.round((completedCredits / totalCredits) * 100)) : 0;
 
   function handleAuthenticated(nextUser: User) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
@@ -375,6 +374,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     coursesByLevel,
     creditsByLevel,
     lockedCodes,
+    totalCredits,
     completedCredits,
     currentCredits,
     currentCount,

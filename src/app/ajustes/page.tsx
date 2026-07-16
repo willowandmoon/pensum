@@ -6,8 +6,9 @@ import { CAREERS, DEFAULT_STICKER_PACK, STICKER_PACKS } from "@/lib/types";
 import { IconLogout } from "@/components/doodles";
 
 export default function AjustesPage() {
-  const { user, updateCurrentSemester, updateBaselineAverages, updateStickerPack, logout } =
+  const { user, courses, updateCurrentSemester, updateBaselineAverages, updateStickerPack, logout } =
     useApp();
+  const numLevels = courses.length ? Math.max(...courses.map((c) => c.level)) : 10;
   const [semester, setSemester] = useState(user.currentSemester ? String(user.currentSemester) : "");
   const [saved, setSaved] = useState(false);
   const activePack = user.stickerPack || DEFAULT_STICKER_PACK;
@@ -101,7 +102,7 @@ export default function AjustesPage() {
             className="rounded-xl border-2 border-ink bg-white px-3 py-2 text-sm font-semibold text-ink outline-none"
           >
             <option value="">Sin definir</option>
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+            {Array.from({ length: numLevels }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
                 Semestre {n}
               </option>

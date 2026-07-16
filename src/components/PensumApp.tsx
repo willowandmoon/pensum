@@ -4,10 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import CourseCard from "./CourseCard";
 import PrereqLines from "./PrereqLines";
 import { useApp } from "@/lib/AppContext";
-import { COURSE_ROW, MAX_ROW } from "@/lib/types";
+import { COURSE_ROW } from "@/lib/types";
 import StickerPicker from "./StickerPicker";
 
-const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
 const SEMESTER_COLORS = [
   "var(--color-tomato)",
@@ -102,6 +102,18 @@ export default function PensumApp() {
     for (const c of courses) map.set(c.code, c);
     return map;
   }, [courses]);
+
+  // La malla se dimensiona según la carrera cargada: número de semestres
+  // (columnas) y de "rieles" temáticos (filas), no un tamaño fijo.
+  const numLevels = useMemo(
+    () => (courses.length ? Math.max(...courses.map((c) => c.level)) : 0),
+    [courses]
+  );
+  const maxRow = useMemo(
+    () => (courses.length ? Math.max(...courses.map((c) => COURSE_ROW[c.code] ?? 1)) : 0),
+    [courses]
+  );
+  const ROMAN = ROMAN_NUMERALS.slice(0, numLevels);
 
   const relatedToHover = useMemo(() => {
     if (!hoveredCode) return null;
@@ -199,8 +211,8 @@ export default function PensumApp() {
             ref={boardRef}
             className="relative grid w-max"
             style={{
-              gridTemplateColumns: "repeat(10, 200px)",
-              gridTemplateRows: `auto repeat(${MAX_ROW}, 88px) auto`,
+              gridTemplateColumns: `repeat(${numLevels}, 200px)`,
+              gridTemplateRows: `auto repeat(${maxRow}, 88px) auto`,
               columnGap: 64,
               rowGap: 24,
               transform: `scale(${scale})`,
@@ -226,7 +238,7 @@ export default function PensumApp() {
             ))}
 
             {courses.map((course, i) => {
-              const row = COURSE_ROW[course.code] ?? MAX_ROW;
+              const row = COURSE_ROW[course.code] ?? maxRow;
               return (
                 <div
                   key={course.code}
@@ -265,7 +277,7 @@ export default function PensumApp() {
               return (
                 <div
                   key={`foot-${i}`}
-                  style={{ gridColumn: level, gridRow: MAX_ROW + 2 }}
+                  style={{ gridColumn: level, gridRow: maxRow + 2 }}
                   className="pt-3 text-center text-[11px] font-bold text-ink/40"
                 >
                   {info.count} ({info.credits} Cr)
