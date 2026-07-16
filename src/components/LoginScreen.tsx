@@ -144,12 +144,15 @@ export default function LoginScreen({
               >
                 {CAREERS.map((c) => (
                   <option key={c.value} value={c.value}>
-                    {c.label}
+                    {c.label} — {c.institution}
                   </option>
                 ))}
               </select>
               <p className="mt-1 text-xs font-semibold text-ink/50">
-                El pensum de esta carrera ya está cargado en la app.
+                Universidad:{" "}
+                <span className="font-bold text-ink/70">
+                  {CAREERS.find((c) => c.value === career)?.institution}
+                </span>
               </p>
             </div>
           )}

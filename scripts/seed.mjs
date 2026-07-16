@@ -148,9 +148,64 @@ const coursesAdministracion = [
   ["ADM043", "Electiva II", 9, 3, "ELEC", []],
 ];
 
+// Tecnología en Manejo de Recursos Ambientales — Unidades Tecnológicas de
+// Santander (UTS). Códigos y créditos tal como vienen en el reporte
+// Academusoft (PENSUM TRA2019-2). area: DCB->CB, DHI->FC, DDI->IDI,
+// DHO->ELEC (optativas libres), TRA->PROG (núcleo del programa).
+const coursesTecAmbiental = [
+  // Período 1
+  ["DCB001", "Álgebra Superior", 1, 4, "CB", []],
+  ["TRA102", "Biología", 1, 3, "PROG", []],
+  ["DCB002", "Cálculo Diferencial", 1, 4, "CB", []],
+  ["TRA101", "Dibujo", 1, 1, "PROG", []],
+  ["DHI014", "Procesos de Lectura y Escritura", 1, 2, "FC", []],
+  ["DHI016", "Cultura Física", 1, 1, "FC", []],
+  // Período 2
+  ["TRA202", "Cartografía y Topografía", 2, 2, "PROG", ["TRA101"]],
+  ["TRA303", "Fauna", 2, 2, "PROG", ["TRA102"]],
+  ["TRA203", "Flora", 2, 2, "PROG", ["TRA102"]],
+  ["DCB009", "Mecánica", 2, 4, "CB", ["DCB001"]],
+  ["TRA204", "Química Inorgánica", 2, 3, "PROG", []],
+  ["DCB003", "Cálculo Integral", 2, 4, "CB", ["DCB002"]],
+  // Período 3
+  ["TRA403", "Ecología Ambiental", 3, 2, "PROG", ["TRA303", "TRA203"]],
+  ["TRA304", "Geología Ambiental", 3, 2, "PROG", ["TRA202"]],
+  ["DHO00A", "Optativa I", 3, 2, "ELEC", []],
+  ["DCB010", "Electromagnetismo", 3, 4, "CB", ["DCB009", "DCB003"]],
+  ["DHI029", "Epistemología", 3, 2, "FC", []],
+  ["TRA405", "Legislación Ambiental", 3, 3, "PROG", []],
+  ["TRA305", "Química Orgánica", 3, 3, "PROG", ["TRA204"]],
+  // Período 4
+  ["DDI009", "Inglés I", 4, 2, "IDI", []],
+  ["TRA404", "Microbiología Ambiental", 4, 2, "PROG", []],
+  ["TRA00R", "Electiva de Profundización", 4, 3, "ELEC", []],
+  ["DCB011", "Laboratorio de Física", 4, 1, "CB", ["DCB010"]],
+  ["DHO00B", "Optativa II", 4, 2, "ELEC", []],
+  ["TRA509", "Principios de Termodinámica", 4, 2, "PROG", []],
+  ["TRA401", "Recurso Agua", 4, 4, "PROG", ["TRA305"]],
+  // Período 5
+  ["TRA402", "Laboratorio de Recurso Agua", 5, 1, "PROG", ["TRA401"]],
+  ["TRA501", "Recurso Aire", 5, 4, "PROG", []],
+  ["TRA00S", "Electiva de Profundización", 5, 3, "ELEC", []],
+  ["DDI010", "Inglés II", 5, 2, "IDI", ["DDI009"]],
+  ["DHI023", "Metodología de la Investigación I", 5, 2, "FC", []],
+  ["TRA503", "Recurso Suelo", 5, 4, "PROG", ["TRA304"]],
+  ["TRA510", "Saneamiento Básico y Ambiental", 5, 2, "PROG", []],
+  // Período 6
+  ["TRA603", "Identificación de Efectos Ambientales", 6, 2, "PROG", []],
+  ["TRA608", "Educación Ambiental", 6, 2, "PROG", []],
+  ["TRA00T", "Electiva de Profundización", 6, 3, "ELEC", []],
+  ["TRA502", "Laboratorio del Recurso Aire", 6, 1, "PROG", ["TRA501"]],
+  ["TRA504", "Laboratorio del Recurso Suelo", 6, 1, "PROG", ["TRA503"]],
+  ["TRA609", "Residuos Sólidos", 6, 4, "PROG", []],
+  ["DCB008", "Cálculo Multivariable", 6, 4, "CB", []],
+  ["DHI003", "Ética", 6, 2, "FC", []],
+];
+
 const CAREER_COURSE_LISTS = [
   { career: "ing-informatica", list: courses },
   { career: "administracion-empresas", list: coursesAdministracion },
+  { career: "tecnologia-recursos-ambientales", list: coursesTecAmbiental },
 ];
 
 async function main() {

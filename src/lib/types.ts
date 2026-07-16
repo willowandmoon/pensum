@@ -1,4 +1,14 @@
-export type Area = "CB" | "CBI" | "IA" | "FC" | "ESP" | "INST" | "FAC" | "PROG" | "ELEC";
+export type Area =
+  | "CB"
+  | "CBI"
+  | "IA"
+  | "FC"
+  | "ESP"
+  | "INST"
+  | "FAC"
+  | "PROG"
+  | "ELEC"
+  | "IDI";
 
 export type Status = "pending" | "current" | "completed";
 
@@ -207,14 +217,28 @@ export interface Career {
   label: string;
   // Texto corto bajo el título de "Pensum" (número de plan, código SNIES, etc).
   planLabel: string;
+  // Universidad/institución dueña de este pensum (se muestra al registrarse).
+  institution: string;
 }
 
 export const CAREERS: Career[] = [
-  { value: "ing-informatica", label: "Ingeniería Informática", planLabel: "Plan 8210" },
+  {
+    value: "ing-informatica",
+    label: "Ingeniería Informática",
+    planLabel: "Plan 8210",
+    institution: "Politécnico Colombiano Jaime Isaza Cadavid",
+  },
   {
     value: "administracion-empresas",
     label: "Administración de Empresas",
     planLabel: "SNIES 102847",
+    institution: "Politécnico Grancolombiano",
+  },
+  {
+    value: "tecnologia-recursos-ambientales",
+    label: "Tecnología en Manejo de Recursos Ambientales",
+    planLabel: "Pensum TRA2019-2",
+    institution: "Unidades Tecnológicas de Santander",
   },
 ];
 
@@ -320,6 +344,7 @@ export const AREA_ORDER: Area[] = [
   "FAC",
   "PROG",
   "ELEC",
+  "IDI",
 ];
 
 // Paleta "scrapbook": cada área es un color de pegatina sólido. `bg` se usa
@@ -384,6 +409,13 @@ export const AREA_INFO: Record<
     bg: "var(--color-tomato)",
     border: "var(--color-ink)",
     text: "var(--color-cream)",
+  },
+  // Idiomas (ej. Unidades Tecnológicas de Santander).
+  IDI: {
+    label: "Idiomas",
+    bg: "var(--color-bubblegum)",
+    border: "var(--color-ink)",
+    text: "var(--color-ink)",
   },
 };
 
@@ -512,4 +544,58 @@ export const COURSE_ROW: Record<string, number> = {
   ADM033: 5, // Generalidades de Riesgo
   ADM038: 5, // Electiva I
   ADM043: 5, // Electiva II
+
+  // --- Tecnología en Manejo de Recursos Ambientales (UTS) ---
+  // No hay diagrama oficial (el pensum viene en tabla), así que las filas
+  // agrupan cadenas de prerrequisito y materias afines por tema.
+  // Fila 1 — Física
+  DCB001: 1, // Álgebra Superior
+  DCB009: 1, // Mecánica
+  DCB010: 1, // Electromagnetismo
+  DCB011: 1, // Laboratorio de Física
+  // Fila 2 — Cálculo
+  DCB002: 2, // Cálculo Diferencial
+  DCB003: 2, // Cálculo Integral
+  DCB008: 2, // Cálculo Multivariable
+  // Fila 3 — Biología / Ecología / Recurso Aire
+  TRA102: 3, // Biología
+  TRA303: 3, // Fauna
+  TRA403: 3, // Ecología Ambiental
+  TRA404: 3, // Microbiología Ambiental
+  TRA501: 3, // Recurso Aire
+  TRA502: 3, // Laboratorio del Recurso Aire
+  // Fila 4 — Dibujo / Cartografía / Geología / Recurso Suelo
+  TRA101: 4, // Dibujo
+  TRA202: 4, // Cartografía y Topografía
+  TRA304: 4, // Geología Ambiental
+  TRA503: 4, // Recurso Suelo
+  TRA504: 4, // Laboratorio del Recurso Suelo
+  // Fila 5 — Química / Recurso Agua / Residuos
+  TRA204: 5, // Química Inorgánica
+  TRA305: 5, // Química Orgánica
+  TRA401: 5, // Recurso Agua
+  TRA402: 5, // Laboratorio de Recurso Agua
+  TRA609: 5, // Residuos Sólidos
+  // Fila 6 — Flora / Legislación / Termodinámica / Saneamiento / Efectos
+  TRA203: 6, // Flora
+  TRA405: 6, // Legislación Ambiental
+  TRA509: 6, // Principios de Termodinámica
+  TRA510: 6, // Saneamiento Básico y Ambiental
+  TRA603: 6, // Identificación de Efectos Ambientales
+  // Fila 7 — Humanidades / Idiomas
+  DHI016: 7, // Cultura Física
+  DHI029: 7, // Epistemología
+  DDI009: 7, // Inglés I
+  DDI010: 7, // Inglés II
+  TRA608: 7, // Educación Ambiental
+  // Fila 8 — Humanidades / Optativas
+  DHI014: 8, // Procesos de Lectura y Escritura
+  DHO00A: 8, // Optativa I
+  DHO00B: 8, // Optativa II
+  DHI023: 8, // Metodología de la Investigación I
+  DHI003: 8, // Ética
+  // Fila 9 — Electivas de Profundización
+  TRA00R: 9, // Electiva de Profundización
+  TRA00S: 9, // Electiva de Profundización
+  TRA00T: 9, // Electiva de Profundización
 };
