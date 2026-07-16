@@ -395,7 +395,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     <AppContext.Provider value={value}>
       <div className="relative min-h-screen lg:flex">
         <Sidebar />
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1 pb-20 lg:pb-0">{children}</main>
       </div>
     </AppContext.Provider>
   );

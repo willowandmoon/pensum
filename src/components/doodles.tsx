@@ -113,22 +113,16 @@ export function IconBoard(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-/** ícono de navegación: mis materias (cuaderno) */
+/** ícono de navegación: mis materias (lista de materias) */
 export function IconBook(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <path
-        d="M4 4.5C4 3.7 4.7 3 5.5 3H12v18H5.5c-.8 0-1.5-.7-1.5-1.5V4.5Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20 4.5c0-.8-.7-1.5-1.5-1.5H12v18h6.5c.8 0 1.5-.7 1.5-1.5V4.5Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
+      <circle cx="4.5" cy="6" r="1.7" fill="currentColor" />
+      <path d="M9.5 6h10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="4.5" cy="12" r="1.7" fill="currentColor" />
+      <path d="M9.5 12h10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="4.5" cy="18" r="1.7" fill="currentColor" />
+      <path d="M9.5 18h10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
     </svg>
   );
 }
