@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CAREERS, User } from "@/lib/types";
 import { Sparkle, Squiggle, Star } from "./doodles";
+import Onboarding from "./Onboarding";
 
 type Mode = "login" | "register";
 
@@ -18,6 +19,9 @@ export default function LoginScreen({
   const [career, setCareer] = useState(CAREERS[0].value);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tras registrarse (no al iniciar sesión), se muestra el onboarding antes
+  // de entrar de lleno a la app.
+  const [newUser, setNewUser] = useState<User | null>(null);
 
   function switchMode(next: Mode) {
     setMode(next);
@@ -56,12 +60,22 @@ export default function LoginScreen({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Error de servidor");
-      onAuthenticated(data.user);
+      if (mode === "register") {
+        setNewUser(data.user);
+      } else {
+        onAuthenticated(data.user);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Algo salió mal.");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (newUser) {
+    return (
+      <Onboarding name={newUser.name} onFinish={() => onAuthenticated(newUser)} />
+    );
   }
 
   return (
